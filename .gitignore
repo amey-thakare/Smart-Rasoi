@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+build/
+
+# Java / Maven
+target/
+*.jar
+*.war
+*.ear
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+
+# Temporary files
+backend.zip
+apache-maven-*.zip

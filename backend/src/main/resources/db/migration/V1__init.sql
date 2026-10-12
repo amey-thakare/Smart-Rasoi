@@ -1,5 +1,5 @@
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -7,8 +7,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE inventory_items (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100),
     quantity DOUBLE PRECISION NOT NULL,
@@ -22,8 +22,8 @@ CREATE TABLE inventory_items (
 );
 
 CREATE TABLE recipes (
-    id SERIAL PRIMARY KEY,
-    owner_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     image_url TEXT,
@@ -43,11 +43,11 @@ CREATE TABLE recipes (
 );
 
 CREATE TABLE recipe_dietary_tags (
-    recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    recipe_id BIGINT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     dietary_tags VARCHAR(100)
 );
 
 CREATE TABLE recipe_allergens (
-    recipe_id INTEGER NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    recipe_id BIGINT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     allergens VARCHAR(100)
 );

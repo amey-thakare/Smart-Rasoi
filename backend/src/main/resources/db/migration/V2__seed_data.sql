@@ -1,5 +1,5 @@
 INSERT INTO users (name, email, password, role) VALUES 
-('Demo User', 'demo@smartrasoi.com', '$2a$10$WbK.8b9/lM5tQ3G1c9D2fOi0.wS9jD6l2Qh3I8T5y3mR1E1kQ1r62', 'USER'); -- password is 'password'
+('Demo User', 'demo@smartrasoi.com', '$2a$10$Hy3nAZ3ZROP0ncUONSvI0OTLEGMyMbz2VLpfGTfYOAJjXX6JsMcJK', 'USER'); -- password is 'password123'
 
 INSERT INTO recipes (owner_id, name, description, cuisine, meal_category, prep_time_minutes, cook_time_minutes, servings, difficulty, calories, protein, carbohydrates, fat, instructions) VALUES
 (1, 'Paneer Tikka Masala', 'A classic vegetarian Indian dish.', 'Indian', 'Dinner', 20, 30, 4, 'Medium', 450, 15, 20, 30, '1. Marinate paneer. 2. Grill paneer. 3. Prepare gravy. 4. Mix and simmer.'),

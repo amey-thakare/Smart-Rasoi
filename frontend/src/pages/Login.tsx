@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@smartrasoi.com');
+  const [password, setPassword] = useState('password123');
   const [error, setError] = useState('');
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();

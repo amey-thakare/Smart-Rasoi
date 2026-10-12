@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../hooks/useAuth';
-import { fetchApi } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Utensils, IndianRupee, AlertTriangle } from 'lucide-react';
 

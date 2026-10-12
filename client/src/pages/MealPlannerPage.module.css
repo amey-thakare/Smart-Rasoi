@@ -1,0 +1,469 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.title {
+  font-size: 1.85rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 680px;
+  margin: 0;
+}
+
+/* Notifications */
+.successBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background-color: var(--color-success-light);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  animation: fadeIn 200ms ease-out;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 0.92rem;
+}
+
+.retryBtn {
+  margin-left: auto;
+  font-weight: 600;
+  text-decoration: underline;
+  color: var(--color-danger-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Navigation Toolbar */
+.toolbarCard {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-xs);
+}
+
+.dateNavGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navArrows {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.navBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navBtn:hover {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.todayBtn {
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.todayBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.dateRangeText {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.viewModeGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.viewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.viewBtn:hover {
+  color: var(--text-primary);
+}
+
+.viewBtnActive {
+  background-color: var(--bg-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Weekly Grid */
+.weeklyGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.dayColumn {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.dayColumnToday {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.15);
+}
+
+.dayColHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--bg-canvas);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dayColTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dayName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.dayNumber {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dayNumberToday {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.addMealDayBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addMealDayBtn:hover {
+  color: var(--color-primary);
+  background-color: var(--bg-surface);
+}
+
+.dayMealsList {
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.emptyDayBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  gap: 4px;
+}
+
+.emptyDayText {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.quickAddLink {
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.quickAddLink:hover {
+  text-decoration: underline;
+}
+
+/* Monthly Grid */
+.monthlyContainer {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.monthlyDaysHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--bg-canvas);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.monthDayHeaderCell {
+  padding: 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.monthlyGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(95px, auto);
+}
+
+.monthCell {
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.monthCell:nth-child(7n) {
+  border-right: none;
+}
+
+.monthCell:hover {
+  background-color: var(--bg-canvas);
+}
+
+.monthCellMuted {
+  opacity: 0.45;
+  background-color: rgba(241, 245, 249, 0.4);
+}
+
+.monthCellToday {
+  background-color: rgba(27, 67, 50, 0.04);
+}
+
+.monthCellHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.monthCellDay {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.monthCellDayToday {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+}
+
+.monthMealCount {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+}
+
+.monthCellMeals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.monthMealPill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 2px 4px;
+  font-size: 0.68rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pillType {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.pillTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pillCooked {
+  border-left: 2px solid var(--color-success);
+}
+
+.morePill {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding-left: 2px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 1024px) {
+  .weeklyGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .weeklyGrid {
+    grid-template-columns: 1fr;
+  }
+  .toolbarCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dateNavGroup {
+    justify-content: space-between;
+  }
+  .viewModeGroup {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

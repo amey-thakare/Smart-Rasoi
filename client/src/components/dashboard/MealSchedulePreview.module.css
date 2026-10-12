@@ -1,0 +1,121 @@
+.container {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.dayBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.dayTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dateLabel {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.mealsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mealCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.mealCard:hover {
+  border-color: var(--color-primary-light);
+  background-color: var(--color-sage-subtle);
+}
+
+.mealLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.typeBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  width: 78px;
+  text-align: center;
+}
+
+.mealInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mealName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mealMeta {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.mealRight {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.planLink {
+  color: var(--color-primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.planLink:hover {
+  text-decoration: underline;
+}

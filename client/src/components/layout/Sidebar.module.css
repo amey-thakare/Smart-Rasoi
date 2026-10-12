@@ -1,0 +1,176 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  background-color: var(--bg-sidebar);
+  color: var(--text-on-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 40;
+  transition: transform var(--transition-normal);
+}
+
+.topSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.brand {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brandLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-inverse);
+}
+
+.logoIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A7F3D0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandName {
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+}
+
+.brandTagline {
+  font-size: 0.7rem;
+  color: var(--text-on-dark-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.closeButton {
+  display: none;
+  color: var(--text-on-dark-muted);
+  padding: 4px;
+  border-radius: var(--radius-xs);
+}
+
+.closeButton:hover {
+  color: #FFFFFF;
+  background-color: var(--bg-sidebar-hover);
+}
+
+.nav {
+  padding: var(--space-md) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-on-dark-muted);
+  transition: all var(--transition-fast);
+}
+
+.navItem:hover {
+  background-color: var(--bg-sidebar-hover);
+  color: #FFFFFF;
+}
+
+.activeItem {
+  background-color: var(--bg-sidebar-active);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #A7F3D0;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.phaseBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #A7F3D0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+}
+
+.versionText {
+  font-size: 0.75rem;
+  color: var(--text-on-dark-muted);
+}
+
+/* Mobile Drawer Overlay and Positioning */
+.overlay {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .closeButton {
+    display: flex;
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 35;
+  }
+}

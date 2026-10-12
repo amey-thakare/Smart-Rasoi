@@ -1,0 +1,94 @@
+:root {
+  /* Brand Palette - Deep Forest Green & Muted Sage */
+  --color-primary: #1B4332;
+  --color-primary-hover: #143527;
+  --color-primary-light: #2D6A4F;
+  --color-primary-subtle: #EDF3EE;
+  
+  --color-secondary: #52796F;
+  --color-secondary-hover: #405F57;
+  --color-sage: #749184;
+  --color-sage-light: #E7EFEA;
+  --color-sage-subtle: #F2F7F4;
+
+  /* Accent & Status Colors */
+  --color-warning: #D97706;
+  --color-warning-hover: #B45309;
+  --color-warning-light: #FEF3C7;
+  --color-warning-border: #FCD34D;
+  --color-warning-text: #92400E;
+
+  --color-danger: #DC2626;
+  --color-danger-light: #FEE2E2;
+  --color-danger-border: #FCA5A5;
+  --color-danger-text: #991B1B;
+
+  --color-success: #15803D;
+  --color-success-light: #DCFCE7;
+  --color-success-border: #86EFAC;
+  --color-success-text: #166534;
+
+  --color-info: #0284C7;
+  --color-info-light: #E0F2FE;
+
+  /* Surfaces & Canvas - Warm Ivory & Crisp Whites */
+  --bg-canvas: #FBF9F4;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F5F1EA;
+  --bg-sidebar: #17382B;
+  --bg-sidebar-hover: #214C3B;
+  --bg-sidebar-active: #295C48;
+
+  /* Text & Content Tokens */
+  --text-primary: #1A241F;
+  --text-secondary: #526058;
+  --text-muted: #7E8E85;
+  --text-on-dark: #F5F7F5;
+  --text-on-dark-muted: #A3B5AA;
+  --text-inverse: #FFFFFF;
+
+  /* Borders & Dividers */
+  --border-subtle: #E8E3DA;
+  --border-card: #ECE8E0;
+  --border-strong: #D5CEBF;
+  --border-focus: #1B4332;
+
+  /* Shadows (Subtle, professional elevation) */
+  --shadow-xs: 0 1px 2px rgba(23, 56, 43, 0.04);
+  --shadow-sm: 0 1px 3px rgba(23, 56, 43, 0.06), 0 1px 2px rgba(23, 56, 43, 0.03);
+  --shadow-md: 0 4px 12px -2px rgba(23, 56, 43, 0.08), 0 2px 4px -2px rgba(23, 56, 43, 0.04);
+  --shadow-lg: 0 10px 24px -4px rgba(23, 56, 43, 0.1), 0 4px 8px -2px rgba(23, 56, 43, 0.05);
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Spacing Tokens */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Layout Dimensions */
+  --sidebar-width: 260px;
+  --header-height: 70px;
+  --container-max-width: 1360px;
+
+  /* Typography */
+  --font-family-base: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-display: 'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

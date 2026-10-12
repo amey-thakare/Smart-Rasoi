@@ -1,0 +1,287 @@
+// Smart Rasoi - Prisma Schema (Phase 3 Smart Kitchen Inventory Management)
+// SQLite is configured as the local file-based database.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  passwordHash   String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  inventoryItems   InventoryItem[]
+  recipes          Recipe[]
+  favourites       Favourite[]
+  mealPlans        MealPlanEntry[]
+  shoppingLists    ShoppingList[]
+  ingredientPrices IngredientPrice[]
+  dietaryProfile   DietaryProfile?
+  mealHistory      MealConsumptionHistory[]
+  monthlyBudget    Float?
+  weeklyBudget     Float?
+
+  @@index([email])
+}
+
+model InventoryItem {
+  id                String                @id @default(cuid())
+  name              String
+  category          String
+  quantity          Float
+  unit              String
+  minimumQuantity   Float                 @default(1)
+  purchaseDate      DateTime?
+  expiryDate        DateTime?
+  notes             String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  userId            String
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consumptions      MealPlanConsumption[]
+  shoppingListItems ShoppingListItem[]
+
+  @@index([userId])
+  @@index([expiryDate])
+  @@index([category])
+}
+
+model Recipe {
+  id              String             @id @default(cuid())
+  title           String
+  description     String?
+  instructions    String
+  category        String
+  cuisine         String?
+  prepTimeMinutes Int                @default(0)
+  cookTimeMinutes Int                @default(0)
+  servings        Int                @default(2)
+  difficulty      String             @default("Easy")
+  imageUrl        String?
+  isPublic        Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  userId          String?
+  user            User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredients     RecipeIngredient[]
+  favourites      Favourite[]
+  mealPlans       MealPlanEntry[]
+  nutrition       RecipeNutrition?
+  mealHistory     MealConsumptionHistory[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([cuisine])
+  @@index([isPublic])
+}
+
+model RecipeIngredient {
+  id         String   @id @default(cuid())
+  recipeId   String
+  name       String
+  quantity   Float
+  unit       String
+  isOptional Boolean  @default(false)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([name])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
+}
+
+model MealPlanEntry {
+  id            String                 @id @default(cuid())
+  userId        String
+  recipeId      String
+  scheduledDate DateTime
+  mealType      String                 // Breakfast, Lunch, Dinner, Snacks
+  servings      Int                    @default(2)
+  status        String                 @default("PLANNED") // PLANNED, COOKED, SKIPPED, CANCELLED
+  notes         String?
+  cookedAt      DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe        Recipe                 @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  consumptions  MealPlanConsumption[]
+  mealHistory   MealConsumptionHistory[]
+
+  @@index([userId])
+  @@index([recipeId])
+  @@index([scheduledDate])
+  @@index([userId, scheduledDate])
+  @@index([status])
+}
+
+model MealPlanConsumption {
+  id               String         @id @default(cuid())
+  mealPlanId       String
+  inventoryItemId  String?
+  ingredientName   String
+  quantityDeducted Float
+  unit             String
+  deductedAt       DateTime       @default(now())
+  isReversed       Boolean        @default(false)
+  reversedAt       DateTime?
+  mealPlan         MealPlanEntry  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  inventoryItem    InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+
+  @@index([mealPlanId])
+  @@index([inventoryItemId])
+}
+
+model ShoppingList {
+  id        String             @id @default(cuid())
+  userId    String
+  name      String
+  budget    Float?
+  status    String             @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  notes     String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     ShoppingListItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model ShoppingListItem {
+  id                  String         @id @default(cuid())
+  shoppingListId      String
+  ingredientName      String
+  quantity            Float
+  unit                String
+  estimatedUnitPrice  Float?
+  estimatedTotalPrice Float?
+  actualUnitPrice     Float?
+  actualTotalPrice    Float?
+  isPurchased         Boolean        @default(false)
+  purchasedQuantity   Float?
+  purchasedUnit       String?
+  purchasedAt         DateTime?
+  inventoryItemId     String?
+  addedToInventory    Boolean        @default(false)
+  notes               String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  shoppingList        ShoppingList   @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  inventoryItem       InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+
+  @@index([shoppingListId])
+  @@index([ingredientName])
+  @@index([isPurchased])
+}
+
+model IngredientPrice {
+  id             String   @id @default(cuid())
+  userId         String
+  ingredientName String
+  unit           String
+  price          Float    // Recorded purchase or total price
+  unitPrice      Float    // Price per standard unit
+  quantity       Float?   // Quantity recorded with this price
+  source         String?  // Store description or 'MANUAL', 'PURCHASE', 'ESTIMATE'
+  recordedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ingredientName])
+  @@index([recordedAt])
+}
+
+model RecipeNutrition {
+  id                 String   @id @default(cuid())
+  recipeId           String   @unique
+  servings           Int      @default(2)
+  calories           Float
+  proteinGrams       Float
+  carbohydratesGrams Float
+  fatGrams           Float
+  fiberGrams         Float
+  sugarGrams         Float?
+  sodiumMilligrams   Float?
+  source             String   @default("CALCULATED") // CALCULATED, MANUAL, INCOMPLETE, UNAVAILABLE
+  isEstimated        Boolean  @default(true)
+  completenessScore  Float    @default(100)
+  missingIngredients String?  // JSON stringified list of ingredients with missing nutrition data
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  recipe             Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model DietaryProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  dietaryPreference   String?  // NONE, VEGETARIAN, VEGAN, EGGETARIAN, NON_VEGETARIAN, JAIN
+  dailyCalorieTarget  Float?
+  proteinTarget       Float?
+  carbohydrateTarget  Float?
+  fatTarget           Float?
+  fiberTarget         Float?
+  sodiumTarget        Float?
+  allergies           String?  // JSON string or comma-separated
+  dislikedIngredients String?  // JSON string or comma-separated
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model MealConsumptionHistory {
+  id                 String         @id @default(cuid())
+  userId             String
+  mealPlanId         String?
+  recipeId           String?
+  recipeTitle        String         // Preserved historical snapshot
+  consumedDate       DateTime
+  mealType           String         // Breakfast, Lunch, Dinner, Snacks
+  servingsConsumed   Float          @default(1)
+  calories           Float?         // Total calories consumed (scaled to servingsConsumed)
+  proteinGrams       Float?
+  carbohydratesGrams Float?
+  fatGrams           Float?
+  fiberGrams         Float?
+  sugarGrams         Float?
+  sodiumMilligrams   Float?
+  source             String         @default("COOKED_MEAL") // COOKED_MEAL, MANUAL_LOG, QUICK_ADD
+  isEstimated        Boolean        @default(true)
+  completenessScore  Float?
+  notes              String?
+  isReversed         Boolean        @default(false)
+  reversedAt         DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe             Recipe?        @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  mealPlan           MealPlanEntry? @relation(fields: [mealPlanId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([consumedDate])
+  @@index([mealPlanId])
+  @@index([isReversed])
+}
+

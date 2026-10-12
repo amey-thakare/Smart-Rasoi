@@ -1,0 +1,183 @@
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* Welcome Banner */
+.welcomeBanner {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #122B20 100%);
+  color: var(--text-inverse);
+  padding: var(--space-xl) var(--space-2xl);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcomeBanner::after {
+  content: '';
+  position: absolute;
+  right: -50px;
+  top: -50px;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(167, 243, 208, 0.15) 0%, rgba(27, 67, 50, 0) 70%);
+  pointer-events: none;
+}
+
+.welcomeContent {
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  z-index: 1;
+}
+
+.welcomeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #A7F3D0;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+}
+
+.welcomeTitle {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+
+.welcomeText {
+  font-size: 0.95rem;
+  color: #D1E0D7;
+  line-height: 1.5;
+}
+
+.welcomeActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.welcomeBtnPrimary {
+  background-color: #A7F3D0;
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-fast);
+}
+
+.welcomeBtnPrimary:hover {
+  background-color: #6EE7B7;
+  transform: translateY(-1px);
+}
+
+.welcomeBtnSecondary {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-fast);
+}
+
+.welcomeBtnSecondary:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Metric Cards Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+/* Quick Actions Grid */
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+/* Two-column Layout: Inventory & Schedule */
+.splitSection {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Recipe Grid */
+.recipesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .quickActionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .splitSection {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .recipesGrid {
+    grid-template-columns: 1fr;
+  }
+  .welcomeBanner {
+    padding: var(--space-lg);
+  }
+  .welcomeTitle {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  .quickActionsGrid {
+    grid-template-columns: 1fr;
+  }
+}

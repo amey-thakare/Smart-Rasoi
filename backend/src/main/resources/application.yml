@@ -15,6 +15,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    validate-on-migrate: false
 
 jwt:
   secret: ${JWT_SECRET:8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2bd32890656a422eb7fbd30716f91b7d8d212ab083074f76263ec403edff7fc767e7ec9df}

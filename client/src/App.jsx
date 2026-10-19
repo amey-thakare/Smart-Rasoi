@@ -10,7 +10,8 @@ import RecipesPage from './pages/RecipesPage.jsx';
 import AiAssistantPage from './pages/AiAssistantPage.jsx';
 import MealPlannerPage from './pages/MealPlannerPage.jsx';
 import ShoppingListPage from './pages/ShoppingListPage.jsx';
-import PlaceholderPage from './pages/PlaceholderPage.jsx';
+import NutritionPage from './pages/NutritionPage.jsx';
+import BudgetWastePage from './pages/BudgetWastePage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -38,45 +39,11 @@ export default function App() {
               <Route path="/recipes" element={<RecipesPage />} />
               <Route path="/ai-assistant" element={<AiAssistantPage />} />
               <Route path="/meal-planner" element={<MealPlannerPage />} />
-
-              <Route
-                path="/nutrition"
-                element={
-                  <PlaceholderPage
-                    title="Nutritional Intake Analysis"
-                    description="Monitor macro and micronutrient distributions across your planned and consumed meals to maintain a healthy, balanced lifestyle."
-                    iconName="Apple"
-                    phase="Phase 4"
-                    upcomingFeatures={[
-                      'Daily and weekly caloric breakdown charts',
-                      'Macronutrient balance monitoring (Proteins, Carbs, Fats)',
-                      'Nutritional shortfall and excess alerts',
-                      'Dietary goal tracking tailored to household members'
-                    ]}
-                  />
-                }
-              />
-
+              <Route path="/nutrition" element={<NutritionPage />} />
               <Route path="/shopping-list" element={<ShoppingListPage />} />
               <Route path="/shopping-lists" element={<Navigate to="/shopping-list" replace />} />
 
-              <Route
-                path="/budget-waste"
-                element={
-                  <PlaceholderPage
-                    title="Grocery Budget & Food Waste Analytics"
-                    description="Gain insights into monthly grocery spending, identify trends in avoidable food waste, and discover practical ways to save money."
-                    iconName="PiggyBank"
-                    phase="Phase 4"
-                    upcomingFeatures={[
-                      'Monthly grocery budget limits and expense tracking',
-                      'Historical log of discarded ingredients and root cause tagging',
-                      'Estimated monetary savings achieved through waste prevention',
-                      'Smart purchase quantity recommendations'
-                    ]}
-                  />
-                }
-              />
+              <Route path="/budget-waste" element={<BudgetWastePage />} />
 
               <Route path="/settings" element={<SettingsPage />} />
 

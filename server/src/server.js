@@ -5,9 +5,9 @@ const initialPort = env.PORT || 5000;
 let currentServer = null;
 
 function startServer(port) {
-  const srv = app.listen(port, () => {
-    console.log(`[Smart Rasoi Server] Running on http://localhost:${port}`);
-    console.log(`[Smart Rasoi Server] Health check available at http://localhost:${port}/api/health`);
+  const srv = app.listen(port, '0.0.0.0', () => {
+    console.log(`[Smart Rasoi Server] Running on http://0.0.0.0:${port}`);
+    console.log(`[Smart Rasoi Server] Health check available at http://0.0.0.0:${port}/api/health`);
     console.log(`[Smart Rasoi Server] Allowed Client URL: ${env.CLIENT_URL}`);
     console.log(`[Smart Rasoi Server] Database: SQLite (${env.DATABASE_URL})`);
   });

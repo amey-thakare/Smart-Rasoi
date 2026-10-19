@@ -8,6 +8,8 @@ import aiRoutes from './aiRoutes.js';
 import mealPlanRoutes from './mealPlanRoutes.js';
 import shoppingListRoutes from './shoppingListRoutes.js';
 import ingredientPriceRoutes from './ingredientPriceRoutes.js';
+import nutritionRoutes from './nutritionRoutes.js';
+import wasteRoutes from './wasteRoutes.js';
 
 const router = Router();
 
@@ -37,5 +39,11 @@ router.use('/shopping-lists', shoppingListRoutes);
 
 // Ingredient Price Tracking endpoints (/api/ingredient-prices)
 router.use('/ingredient-prices', ingredientPriceRoutes);
+
+// Nutrition Analysis & Dietary Tracking endpoints (/api/nutrition)
+router.use('/nutrition', nutritionRoutes);
+
+// Food-Waste Analytics & Expiry Tracking endpoints (/api/waste)
+router.use('/waste', wasteRoutes);
 
 export default router;

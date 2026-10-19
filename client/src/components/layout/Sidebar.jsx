@@ -57,11 +57,6 @@ export default function Sidebar({ isOpen, onClose }) {
             })}
           </nav>
         </div>
-
-        <div className={styles.footer}>
-          <div className={styles.phaseBadge}>Phase 1 Preview</div>
-          <span className={styles.versionText}>Demonstration Foundation</span>
-        </div>
       </aside>
     </>
   );

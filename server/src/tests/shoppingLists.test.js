@@ -592,4 +592,66 @@ describe('Smart Rasoi Phase 8 - Smart Shopping Lists, Grocery Budgets & Ingredie
     assert.equal(summary.monthlyBudget, 8000);
     assert.equal(summary.weeklyBudget, 2000);
   });
+
+  test('14. Bulk Item Addition: adds multiple missing ingredients, handles merging and IDOR isolation', async () => {
+    // Create a new list for User A
+    const listRes = await request(app)
+      .post('/api/shopping-lists')
+      .set('Cookie', cookieA)
+      .send({ name: 'Recipe Ingredients Test List' });
+    assert.equal(listRes.status, 201);
+    const listId = listRes.body.data.list.id;
+
+    // Bulk add items
+    const bulkRes = await request(app)
+      .post(`/api/shopping-lists/${listId}/items/bulk`)
+      .set('Cookie', cookieA)
+      .send({
+        items: [
+          { ingredientName: 'Basmati Rice', quantity: 2, unit: 'cups', notes: 'For fried rice' },
+          { ingredientName: 'Carrots', quantity: 0.5, unit: 'cups', notes: 'For fried rice' },
+          { ingredientName: 'Garlic', quantity: 3, unit: 'cloves', notes: 'For fried rice' }
+        ]
+      });
+
+    assert.equal(bulkRes.status, 201);
+    assert.equal(bulkRes.body.data.count, 3);
+    assert.equal(bulkRes.body.data.items.length, 3);
+
+    // Bulk add again with overlapping item to verify merging
+    const mergeRes = await request(app)
+      .post(`/api/shopping-lists/${listId}/items/bulk`)
+      .set('Cookie', cookieA)
+      .send({
+        items: [
+          { ingredientName: 'Basmati Rice', quantity: 1, unit: 'cups', notes: 'Extra rice' },
+          { ingredientName: 'Soy Sauce', quantity: 2, unit: 'tbsp' }
+        ]
+      });
+
+    assert.equal(mergeRes.status, 201);
+    const listCheck = await request(app)
+      .get(`/api/shopping-lists/${listId}`)
+      .set('Cookie', cookieA);
+
+    const riceItem = listCheck.body.data.list.items.find((i) => i.ingredientName.toLowerCase() === 'basmati rice');
+    assert.ok(riceItem);
+    assert.equal(riceItem.quantity, 3); // 2 + 1 merged!
+
+    // IDOR Protection: User B cannot bulk add to User A's list
+    const idorRes = await request(app)
+      .post(`/api/shopping-lists/${listId}/items/bulk`)
+      .set('Cookie', cookieB)
+      .send({
+        items: [{ ingredientName: 'Hacker Salt', quantity: 10, unit: 'kg' }]
+      });
+    assert.equal(idorRes.status, 404);
+
+    // Validation: empty array rejected with 400
+    const emptyRes = await request(app)
+      .post(`/api/shopping-lists/${listId}/items/bulk`)
+      .set('Cookie', cookieA)
+      .send({ items: [] });
+    assert.equal(emptyRes.status, 400);
+  });
 });

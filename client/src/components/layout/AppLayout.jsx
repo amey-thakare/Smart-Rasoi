@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import Header from './Header.jsx';
+import ErrorBoundary from '../common/ErrorBoundary.jsx';
 import { navigationItems } from '../../data/navigationConfig.js';
 import styles from './AppLayout.module.css';
 
@@ -26,7 +27,9 @@ export default function AppLayout() {
           onToggleMobileMenu={() => setMobileMenuOpen(true)}
         />
         <main className={styles.contentContainer}>
-          <Outlet />
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

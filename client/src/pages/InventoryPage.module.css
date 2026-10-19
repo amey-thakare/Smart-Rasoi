@@ -46,6 +46,23 @@
   max-width: 680px;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.headerLinkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
 .addBtn {
   box-shadow: var(--shadow-sm);
   padding: 10px 20px;
@@ -526,8 +543,46 @@
   gap: 6px;
 }
 
+.qtyStepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+}
+
+.qtyStepperBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.qtyStepperBtn:hover:not(:disabled) {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.qtyStepperBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .actionBtnEdit,
-.actionBtnDelete {
+.actionBtnDelete,
+.actionBtnRecipe,
+.actionBtnAi,
+.actionBtnWaste {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -536,6 +591,9 @@
   border-radius: var(--radius-sm);
   background-color: transparent;
   color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
   transition: all var(--transition-fast);
 }
 
@@ -547,6 +605,21 @@
 .actionBtnDelete:hover {
   background-color: var(--color-danger-light);
   color: var(--color-danger);
+}
+
+.actionBtnWaste:hover {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-hover);
+}
+
+.actionBtnRecipe:hover {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.actionBtnAi:hover {
+  background-color: #ede9fe;
+  color: #6d28d9;
 }
 
 .tableFooter {

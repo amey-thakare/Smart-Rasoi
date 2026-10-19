@@ -15,8 +15,12 @@ import {
   Minus,
   Plus,
   RotateCcw,
-  Calendar
+  Calendar,
+  ShoppingCart
 } from 'lucide-react';
+import RecipeNutritionCard from '../nutrition/RecipeNutritionCard.jsx';
+import AddMissingToShoppingListModal from '../shopping/AddMissingToShoppingListModal.jsx';
+import ErrorBoundary from '../common/ErrorBoundary.jsx';
 import styles from './RecipeDetailModal.module.css';
 
 export default function RecipeDetailModal({
@@ -31,6 +35,9 @@ export default function RecipeDetailModal({
 }) {
   const [favLoading, setFavLoading] = useState(false);
   const [currentServings, setCurrentServings] = useState(recipe?.servings || 2);
+  const [isShoppingModalOpen, setIsShoppingModalOpen] = useState(false);
+  const [activeMissingForShopping, setActiveMissingForShopping] = useState([]);
+  const [shoppingNotice, setShoppingNotice] = useState('');
 
   useEffect(() => {
     if (recipe?.servings) {
@@ -64,6 +71,33 @@ export default function RecipeDetailModal({
   const missingNames = (match?.missingIngredients || []).map((i) => (typeof i === 'string' ? i.toLowerCase() : i.name?.toLowerCase()));
   const expiringNames = (match?.expiringSoonIngredients || []).map((n) => n.toLowerCase());
 
+  const scaleRatio = currentServings / (recipe.servings || 2);
+  const allMissingIngredients = (recipe.ingredients || [])
+    .filter((ing) => {
+      const norm = ing.name.toLowerCase();
+      if (availableNames.length > 0) {
+        return !availableNames.includes(norm);
+      }
+      if (missingNames.length > 0) {
+        return missingNames.includes(norm);
+      }
+      return match && !match.canCook && !ing.isOptional;
+    })
+    .map((ing) => {
+      const isNonLinear = ['salt', 'pepper', 'chili', 'cayenne', 'clove', 'cinnamon'].some((kw) =>
+        ing.name.toLowerCase().includes(kw)
+      );
+      const scaledQuantity = isNonLinear && scaleRatio > 1
+        ? Number((ing.quantity * (1 + (scaleRatio - 1) * 0.7)).toFixed(2))
+        : Number((ing.quantity * scaleRatio).toFixed(2));
+
+      return {
+        ...ing,
+        scaledQuantity
+      };
+    });
+
+  const hasMissingIngredients = allMissingIngredients.length > 0 || (match && !match.canCook);
   const totalTime = (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0);
 
   return (
@@ -217,6 +251,40 @@ export default function RecipeDetailModal({
                   </span>
                 </div>
               )}
+
+              {/* Add Missing to Shopping List Banner Action */}
+              {(!match.canCook || allMissingIngredients.length > 0) && (
+                <div className={styles.matchAlertActions}>
+                  <button
+                    type="button"
+                    className={styles.addMissingBannerBtn}
+                    onClick={() => {
+                      setActiveMissingForShopping(allMissingIngredients);
+                      setIsShoppingModalOpen(true);
+                    }}
+                    title="Add missing ingredients directly to your shopping list"
+                  >
+                    <ShoppingCart size={14} />
+                    <span>Add Missing to Shopping List</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Inline Shopping Success Toast/Banner */}
+          {shoppingNotice && (
+            <div className={styles.shoppingSuccessBanner}>
+              <CheckCircle2 size={16} />
+              <span>{shoppingNotice}</span>
+              <button
+                type="button"
+                className={styles.closeNoticeBtn}
+                onClick={() => setShoppingNotice('')}
+                aria-label="Dismiss notice"
+              >
+                <X size={13} />
+              </button>
             </div>
           )}
 
@@ -282,6 +350,22 @@ export default function RecipeDetailModal({
                         )}
                       </span>
 
+                      {/* Add Single Missing Ingredient to Shopping List */}
+                      {!isAvailable && (
+                        <button
+                          type="button"
+                          className={styles.addSingleToListBtn}
+                          onClick={() => {
+                            setActiveMissingForShopping([{ ...ing, scaledQuantity: scaledQty }]);
+                            setIsShoppingModalOpen(true);
+                          }}
+                          title={`Add ${ing.name} to shopping list`}
+                        >
+                          <Plus size={11} />
+                          <span>To List</span>
+                        </button>
+                      )}
+
                       {/* Substitution Assistant Button */}
                       {onSubstituteIngredient && (
                         <button
@@ -314,6 +398,15 @@ export default function RecipeDetailModal({
             </div>
           </div>
 
+          {/* Nutrition Analysis Card */}
+          <ErrorBoundary>
+            <RecipeNutritionCard
+              recipeId={recipe.id}
+              recipeServings={recipe.servings || 2}
+              currentServings={currentServings}
+            />
+          </ErrorBoundary>
+
           {/* Instructions Section */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
@@ -339,6 +432,22 @@ export default function RecipeDetailModal({
 
         {/* Footer Actions */}
         <div className={styles.footer}>
+          {hasMissingIngredients && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMissingForShopping(allMissingIngredients);
+                setIsShoppingModalOpen(true);
+              }}
+              className="btn btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              title="Add missing recipe ingredients directly to your shopping list"
+            >
+              <ShoppingCart size={15} />
+              <span>Add Missing to Shopping List</span>
+            </button>
+          )}
+
           {onModifyWithAi && (
             <button
               type="button"
@@ -401,13 +510,26 @@ export default function RecipeDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="btn btn-primary"
+            className="btn btn-secondary"
             style={{ marginLeft: 'auto' }}
           >
             Close
           </button>
         </div>
       </div>
+
+      {/* Add Missing to Shopping List Modal */}
+      <AddMissingToShoppingListModal
+        isOpen={isShoppingModalOpen}
+        onClose={() => setIsShoppingModalOpen(false)}
+        recipe={recipe}
+        currentServings={currentServings}
+        missingIngredients={activeMissingForShopping.length > 0 ? activeMissingForShopping : allMissingIngredients}
+        onSuccess={(result) => {
+          setShoppingNotice(`Added ${result.addedCount} items to "${result.listName}"!`);
+          setTimeout(() => setShoppingNotice(''), 5000);
+        }}
+      />
     </div>
   );
 }

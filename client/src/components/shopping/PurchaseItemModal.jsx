@@ -9,12 +9,16 @@ export default function PurchaseItemModal({
   onConfirmPurchase
 }) {
   const [actualQuantity, setActualQuantity] = useState(
-    item?.actualQuantity !== null && item?.actualQuantity !== undefined
+    item?.purchasedQuantity !== null && item?.purchasedQuantity !== undefined
+      ? item.purchasedQuantity
+      : item?.actualQuantity !== null && item?.actualQuantity !== undefined
       ? item.actualQuantity
       : item?.quantity || 1
   );
   const [actualPrice, setActualPrice] = useState(
-    item?.actualPrice !== null && item?.actualPrice !== undefined
+    item?.actualTotalPrice !== null && item?.actualTotalPrice !== undefined
+      ? item.actualTotalPrice
+      : item?.actualPrice !== null && item?.actualPrice !== undefined
       ? item.actualPrice
       : item?.estimatedTotalPrice || ''
   );
@@ -26,6 +30,8 @@ export default function PurchaseItemModal({
   const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen || !item) return null;
+
+  const itemName = item.ingredientName || item.name || 'Item';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,13 +52,18 @@ export default function PurchaseItemModal({
     setSubmitting(true);
     try {
       await onConfirmPurchase({
+        isPurchased: true,
         purchased: true,
+        purchasedQuantity: qty,
         actualQuantity: qty,
+        actualTotalPrice: price,
         actualPrice: price,
         store: store.trim() || null,
+        notes: store.trim() || null,
         addToInventory,
         inventoryData: addToInventory
           ? {
+              category: location,
               location,
               expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null
             }
@@ -76,7 +87,7 @@ export default function PurchaseItemModal({
             </div>
             <div>
               <h3>Mark as Purchased</h3>
-              <span className={styles.itemSubtitle}>{item.name} ({item.quantity} {item.unit} planned)</span>
+              <span className={styles.itemSubtitle}>{itemName} ({item.quantity} {item.unit} planned)</span>
             </div>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close modal">

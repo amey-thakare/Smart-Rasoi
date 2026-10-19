@@ -73,6 +73,19 @@ export const addItem = async (req, res, next) => {
   }
 };
 
+export const addBulkItems = async (req, res, next) => {
+  try {
+    const items = req.body.items || [];
+    const result = await shoppingListService.addBulkItems(req.user.id, req.params.id, items);
+    res.status(201).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateItem = async (req, res, next) => {
   try {
     const item = await shoppingListService.updateItem(req.user.id, req.params.id, req.params.itemId, req.body);

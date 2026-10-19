@@ -20,6 +20,20 @@ const normalizeName = (name) => {
 };
 
 /**
+ * Normalizes a shopping list item for consistent API responses
+ */
+export const formatShoppingListItem = (item) => {
+  if (!item) return item;
+  return {
+    ...item,
+    name: item.name || item.ingredientName,
+    purchased: Boolean(item.isPurchased),
+    actualPrice: item.actualTotalPrice,
+    actualQuantity: item.purchasedQuantity
+  };
+};
+
+/**
  * Calculates metrics and totals for a shopping list and its items
  */
 export const calculateListMetrics = (list) => {
@@ -102,7 +116,8 @@ export const getShoppingLists = async (userId, filters = {}) => {
     const metrics = calculateListMetrics(list);
     return {
       ...list,
-      ...metrics
+      ...metrics,
+      items: (list.items || []).map(formatShoppingListItem)
     };
   });
 };
@@ -140,7 +155,11 @@ export const createShoppingList = async (userId, data = {}) => {
   });
 
   const metrics = calculateListMetrics(list);
-  return { ...list, ...metrics };
+  return {
+    ...list,
+    ...metrics,
+    items: (list.items || []).map(formatShoppingListItem)
+  };
 };
 
 /**
@@ -164,7 +183,11 @@ export const getShoppingListById = async (userId, listId) => {
   }
 
   const metrics = calculateListMetrics(list);
-  return { ...list, ...metrics };
+  return {
+    ...list,
+    ...metrics,
+    items: (list.items || []).map(formatShoppingListItem)
+  };
 };
 
 /**
@@ -219,7 +242,11 @@ export const updateShoppingList = async (userId, listId, updateData = {}) => {
   });
 
   const metrics = calculateListMetrics(updated);
-  return { ...updated, ...metrics };
+  return {
+    ...updated,
+    ...metrics,
+    items: (updated.items || []).map(formatShoppingListItem)
+  };
 };
 
 /**
@@ -253,11 +280,13 @@ export const addItem = async (userId, listId, itemData = {}) => {
     throw new ShoppingListError('Shopping list not found', 404);
   }
 
-  const { ingredientName, quantity, unit, estimatedUnitPrice, notes } = itemData;
-
-  if (!ingredientName || typeof ingredientName !== 'string' || !ingredientName.trim()) {
+  const rawName = itemData.ingredientName || itemData.name;
+  if (!rawName || typeof rawName !== 'string' || !rawName.trim()) {
     throw new ShoppingListError('Ingredient name is required', 400);
   }
+  const ingredientName = rawName.trim();
+
+  const { quantity, unit, estimatedUnitPrice, notes } = itemData;
 
   const numQty = Number(quantity);
   if (isNaN(numQty) || numQty <= 0) {
@@ -290,7 +319,7 @@ export const addItem = async (userId, listId, itemData = {}) => {
   const item = await prisma.shoppingListItem.create({
     data: {
       shoppingListId: listId,
-      ingredientName: ingredientName.trim(),
+      ingredientName,
       quantity: Number(numQty.toFixed(2)),
       unit: cleanUnit,
       estimatedUnitPrice: estUnitPrice,
@@ -299,7 +328,115 @@ export const addItem = async (userId, listId, itemData = {}) => {
     }
   });
 
-  return item;
+  return formatShoppingListItem(item);
+};
+
+/**
+ * Adds multiple items to a shopping list in a single batch operation
+ */
+export const addBulkItems = async (userId, listId, items = []) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new ShoppingListError('Items array cannot be empty', 400);
+  }
+
+  const list = await prisma.shoppingList.findFirst({
+    where: { id: listId, userId },
+    include: { items: true }
+  });
+
+  if (!list) {
+    throw new ShoppingListError('Shopping list not found', 404);
+  }
+
+  const createdItems = [];
+
+  await prisma.$transaction(async (tx) => {
+    for (const rawItem of items) {
+      const rawName = rawItem.ingredientName || rawItem.name;
+      if (!rawName || typeof rawName !== 'string' || !rawName.trim()) {
+        continue;
+      }
+      const ingredientName = rawName.trim();
+      const { quantity, unit, notes } = rawItem;
+
+      const numQty = Number(quantity);
+      if (isNaN(numQty) || numQty <= 0) {
+        continue;
+      }
+
+      const cleanUnit = normalizeUnit(unit || 'unit');
+
+      let estUnitPrice = null;
+      if (rawItem.estimatedUnitPrice !== undefined && rawItem.estimatedUnitPrice !== null && rawItem.estimatedUnitPrice !== '') {
+        const p = Number(rawItem.estimatedUnitPrice);
+        if (!isNaN(p) && p >= 0) {
+          estUnitPrice = Number(p.toFixed(2));
+        }
+      } else {
+        const historical = await getLatestPriceForIngredient(userId, ingredientName, cleanUnit);
+        if (historical && historical.unitPrice) {
+          estUnitPrice = Number(historical.unitPrice.toFixed(2));
+        }
+      }
+
+      const estTotalPrice = estUnitPrice !== null ? Number((numQty * estUnitPrice).toFixed(2)) : null;
+
+      // Check if unpurchased item with same ingredient exists
+      const existing = list.items.find(
+        (it) => !it.isPurchased && normalizeName(it.ingredientName) === normalizeName(ingredientName)
+      );
+
+      if (existing) {
+        const conversion = convertQuantity(numQty, cleanUnit, existing.unit);
+        if (conversion.compatible) {
+          const newQty = Number((existing.quantity + conversion.convertedQuantity).toFixed(2));
+          const newTotal = existing.estimatedUnitPrice
+            ? Number((newQty * existing.estimatedUnitPrice).toFixed(2))
+            : (estTotalPrice ? Number(((existing.estimatedTotalPrice || 0) + estTotalPrice).toFixed(2)) : null);
+
+          const updated = await tx.shoppingListItem.update({
+            where: { id: existing.id },
+            data: {
+              quantity: newQty,
+              estimatedTotalPrice: newTotal,
+              notes: notes ? (existing.notes ? `${existing.notes}; ${notes}` : notes) : existing.notes
+            }
+          });
+          createdItems.push(updated);
+          continue;
+        }
+      }
+
+      const created = await tx.shoppingListItem.create({
+        data: {
+          shoppingListId: listId,
+          ingredientName: ingredientName.trim(),
+          quantity: Number(numQty.toFixed(2)),
+          unit: cleanUnit,
+          estimatedUnitPrice: estUnitPrice,
+          estimatedTotalPrice: estTotalPrice,
+          notes: notes && typeof notes === 'string' ? notes.trim() : null
+        }
+      });
+      createdItems.push(created);
+    }
+  });
+
+  const updatedList = await prisma.shoppingList.findFirst({
+    where: { id: listId, userId },
+    include: { items: true }
+  });
+
+  const metrics = calculateListMetrics(updatedList);
+  return {
+    list: {
+      ...updatedList,
+      ...metrics,
+      items: (updatedList.items || []).map(formatShoppingListItem)
+    },
+    items: createdItems.map(formatShoppingListItem),
+    count: createdItems.length
+  };
 };
 
 /**
@@ -316,11 +453,12 @@ export const updateItem = async (userId, listId, itemId, itemData = {}) => {
 
   const dataToUpdate = {};
 
-  if (itemData.ingredientName !== undefined) {
-    if (!itemData.ingredientName || typeof itemData.ingredientName !== 'string' || !itemData.ingredientName.trim()) {
+  const nameToUpdate = itemData.ingredientName !== undefined ? itemData.ingredientName : itemData.name;
+  if (nameToUpdate !== undefined) {
+    if (!nameToUpdate || typeof nameToUpdate !== 'string' || !nameToUpdate.trim()) {
       throw new ShoppingListError('Ingredient name cannot be empty', 400);
     }
-    dataToUpdate.ingredientName = itemData.ingredientName.trim();
+    dataToUpdate.ingredientName = nameToUpdate.trim();
   }
 
   let finalQty = item.quantity;
@@ -365,7 +503,7 @@ export const updateItem = async (userId, listId, itemId, itemData = {}) => {
     data: dataToUpdate
   });
 
-  return updated;
+  return formatShoppingListItem(updated);
 };
 
 /**
@@ -399,7 +537,9 @@ export const purchaseItem = async (userId, listId, itemId, purchaseData = {}) =>
     throw new ShoppingListError('Shopping list item not found', 404);
   }
 
-  const { isPurchased = true, purchasedQuantity, purchasedUnit, actualUnitPrice, actualTotalPrice, notes } = purchaseData;
+  const isPurchased = purchaseData.isPurchased !== undefined
+    ? Boolean(purchaseData.isPurchased)
+    : (purchaseData.purchased !== undefined ? Boolean(purchaseData.purchased) : true);
 
   if (!isPurchased) {
     // Unmark as purchased
@@ -414,38 +554,52 @@ export const purchaseItem = async (userId, listId, itemId, purchaseData = {}) =>
         purchasedAt: null
       }
     });
-    return unmarked;
+    return formatShoppingListItem(unmarked);
   }
 
   // Marking as purchased
-  const cleanQty = purchasedQuantity !== undefined && purchasedQuantity !== null
-    ? Number(purchasedQuantity)
+  const rawQty = purchaseData.purchasedQuantity !== undefined && purchaseData.purchasedQuantity !== null
+    ? purchaseData.purchasedQuantity
+    : purchaseData.actualQuantity;
+  const cleanQty = rawQty !== undefined && rawQty !== null
+    ? Number(rawQty)
     : item.quantity;
 
   if (isNaN(cleanQty) || cleanQty <= 0) {
     throw new ShoppingListError('Purchased quantity must be greater than zero', 400);
   }
 
-  const cleanUnit = purchasedUnit ? normalizeUnit(purchasedUnit) : item.unit;
+  const rawUnit = purchaseData.purchasedUnit || purchaseData.unit;
+  const cleanUnit = rawUnit ? normalizeUnit(rawUnit) : item.unit;
 
   let unitPrice = null;
   let totalPrice = null;
 
-  if (actualTotalPrice !== undefined && actualTotalPrice !== null && actualTotalPrice !== '') {
-    const numTotal = Number(actualTotalPrice);
+  const rawTotalPrice = purchaseData.actualTotalPrice !== undefined && purchaseData.actualTotalPrice !== null
+    ? purchaseData.actualTotalPrice
+    : purchaseData.actualPrice;
+
+  const rawUnitPrice = purchaseData.actualUnitPrice !== undefined && purchaseData.actualUnitPrice !== null
+    ? purchaseData.actualUnitPrice
+    : purchaseData.unitPrice;
+
+  if (rawTotalPrice !== undefined && rawTotalPrice !== null && rawTotalPrice !== '') {
+    const numTotal = Number(rawTotalPrice);
     if (isNaN(numTotal) || numTotal < 0) {
       throw new ShoppingListError('Actual total price must be non-negative', 400);
     }
     totalPrice = Number(numTotal.toFixed(2));
     unitPrice = Number((totalPrice / cleanQty).toFixed(2));
-  } else if (actualUnitPrice !== undefined && actualUnitPrice !== null && actualUnitPrice !== '') {
-    const numUnit = Number(actualUnitPrice);
+  } else if (rawUnitPrice !== undefined && rawUnitPrice !== null && rawUnitPrice !== '') {
+    const numUnit = Number(rawUnitPrice);
     if (isNaN(numUnit) || numUnit < 0) {
       throw new ShoppingListError('Actual unit price must be non-negative', 400);
     }
     unitPrice = Number(numUnit.toFixed(2));
     totalPrice = Number((cleanQty * unitPrice).toFixed(2));
   }
+
+  const rawNotes = purchaseData.notes !== undefined ? purchaseData.notes : purchaseData.store;
 
   const updated = await prisma.shoppingListItem.update({
     where: { id: itemId },
@@ -456,7 +610,7 @@ export const purchaseItem = async (userId, listId, itemId, purchaseData = {}) =>
       actualUnitPrice: unitPrice,
       actualTotalPrice: totalPrice,
       purchasedAt: new Date(),
-      notes: notes !== undefined ? (notes ? notes.trim() : null) : item.notes
+      notes: rawNotes !== undefined ? (rawNotes ? String(rawNotes).trim() : null) : item.notes
     }
   });
 
@@ -468,14 +622,14 @@ export const purchaseItem = async (userId, listId, itemId, purchaseData = {}) =>
         unit: cleanUnit,
         price: totalPrice,
         quantity: cleanQty,
-        source: 'PURCHASE'
+        source: purchaseData.store ? `PURCHASE (${String(purchaseData.store).trim()})` : 'PURCHASE'
       });
     } catch {
       // Non-blocking for purchase marking
     }
   }
 
-  return updated;
+  return formatShoppingListItem(updated);
 };
 
 /**
@@ -501,7 +655,7 @@ export const addItemToInventory = async (userId, listId, itemId, inventoryOption
   const targetQty = item.purchasedQuantity || item.quantity;
   const targetUnit = item.purchasedUnit || item.unit;
   const targetName = inventoryOptions.name || item.ingredientName;
-  const category = inventoryOptions.category || 'Pantry';
+  const category = inventoryOptions.category || inventoryOptions.location || 'Pantry';
 
   const purchaseDate = inventoryOptions.purchaseDate ? new Date(inventoryOptions.purchaseDate) : new Date();
   let expiryDate = null;
@@ -578,7 +732,7 @@ export const addItemToInventory = async (userId, listId, itemId, inventoryOption
       }
     });
 
-    return { item: updatedItem, inventoryItem: inventoryRecord };
+    return { item: formatShoppingListItem(updatedItem), inventoryItem: inventoryRecord };
   });
 
   return result;

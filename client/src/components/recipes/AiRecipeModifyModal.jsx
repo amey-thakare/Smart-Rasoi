@@ -116,7 +116,7 @@ export default function AiRecipeModifyModal({
             </div>
             <div>
               <h2 className={styles.title}>Modify Recipe with AI</h2>
-              <p className={styles.subtitle}>Transform and customize dishes using Chef Gemini</p>
+              <p className={styles.subtitle}>Transform and customize dishes using AI Chef</p>
             </div>
           </div>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close modal">
@@ -207,7 +207,7 @@ export default function AiRecipeModifyModal({
                 {loading ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Chef Gemini is modifying recipe...</span>
+                    <span>AI Chef is modifying recipe...</span>
                   </>
                 ) : (
                   <>

@@ -165,7 +165,7 @@ export default function AiRecipeGeneratorModal({
               <div className={styles.loadingSpinner} />
               <div>
                 <h3 style={{ fontSize: '1.125rem', fontWeight: 700, margin: '0 0 4px 0' }}>
-                  Chef Gemini is cooking up your recipe...
+                  AI Chef is cooking up your recipe...
                 </h3>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
                   Analyzing your pantry inventory, balancing flavors, and structuring steps.

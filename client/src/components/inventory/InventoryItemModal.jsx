@@ -30,7 +30,10 @@ export default function InventoryItemModal({
   isOpen,
   onClose,
   onSubmit,
-  initialData = null
+  onSave,
+  initialData = null,
+  loading = false,
+  serverError: externalServerError = ''
 }) {
   const isEditing = Boolean(initialData && initialData.id);
 
@@ -139,7 +142,7 @@ export default function InventoryItemModal({
     e.preventDefault();
     setServerError('');
 
-    if (!validate() || isSubmitting) return;
+    if (!validate() || isSubmitting || loading) return;
 
     setIsSubmitting(true);
     try {
@@ -151,10 +154,13 @@ export default function InventoryItemModal({
         minimumQuantity: formData.minimumQuantity !== '' ? parseFloat(formData.minimumQuantity) : 1,
         purchaseDate: formData.purchaseDate || null,
         expiryDate: formData.expiryDate || null,
-        notes: formData.notes.trim() || null
+        notes: formData.notes ? formData.notes.trim() : null
       };
 
-      await onSubmit(payload);
+      const handler = onSave || onSubmit;
+      if (typeof handler === 'function') {
+        await handler(payload);
+      }
       onClose();
     } catch (err) {
       setServerError(err.response?.data?.message || err.message || 'Failed to save inventory item');
@@ -162,6 +168,8 @@ export default function InventoryItemModal({
       setIsSubmitting(false);
     }
   };
+
+  const displayError = serverError || externalServerError;
 
   return (
     <div className={styles.backdrop} onClick={onClose} role="dialog" aria-modal="true">
@@ -188,10 +196,10 @@ export default function InventoryItemModal({
 
         <form onSubmit={handleSubmit}>
           <div className={styles.body}>
-            {serverError && (
+            {displayError && (
               <div className={styles.errorBanner} role="alert">
                 <AlertCircle size={18} style={{ flexShrink: 0 }} />
-                <span>{serverError}</span>
+                <span>{displayError}</span>
               </div>
             )}
 
@@ -348,12 +356,12 @@ export default function InventoryItemModal({
               type="button"
               className="btn btn-secondary"
               onClick={onClose}
-              disabled={isSubmitting}
+              disabled={isSubmitting || loading}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting || loading}>
+              {isSubmitting || loading ? (
                 <>
                   <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
                   <span>Saving...</span>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Plus,
+  Minus,
   Search,
   Filter,
   X,
@@ -15,11 +17,13 @@ import {
   ArrowUpDown,
   Refrigerator,
   Layers,
-  Sparkles
+  Sparkles,
+  Utensils
 } from 'lucide-react';
 import StatCard from '../components/common/StatCard.jsx';
 import InventoryItemModal from '../components/inventory/InventoryItemModal.jsx';
 import DeleteConfirmModal from '../components/inventory/DeleteConfirmModal.jsx';
+import RecordWasteModal from '../components/waste/RecordWasteModal.jsx';
 import {
   fetchInventoryItems,
   fetchInventorySummary,
@@ -84,6 +88,10 @@ export default function InventoryPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
 
+  // Phase 10: Food waste logging modal state
+  const [isWasteModalOpen, setIsWasteModalOpen] = useState(false);
+  const [itemForWaste, setItemForWaste] = useState(null);
+
   // Debounce search query
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -99,7 +107,7 @@ export default function InventoryPage() {
   const loadSummary = useCallback(async () => {
     try {
       const data = await fetchInventorySummary();
-      setSummary(data);
+      setSummary(data?.data || data || {});
     } catch (err) {
       console.error('Failed to load inventory summary:', err);
     }
@@ -125,7 +133,8 @@ export default function InventoryPage() {
 
       // Prevent race conditions: only update if this is the latest request
       if (currentRequestId === requestIdRef.current) {
-        setItems(data.items || []);
+        const itemsList = data?.data?.items || data?.items || (Array.isArray(data) ? data : []);
+        setItems(itemsList);
       }
     } catch (err) {
       if (currentRequestId === requestIdRef.current) {
@@ -137,6 +146,24 @@ export default function InventoryPage() {
       }
     }
   }, [debouncedSearch, selectedCategory, expiryFilter, lowStockFilter, sortBy, sortOrder]);
+
+  // Quick inline quantity adjustment (+ / -)
+  const handleQuickAdjustQuantity = async (item, delta, e) => {
+    e?.stopPropagation();
+    const newQty = Math.max(0, Math.round((Number(item.quantity) + delta) * 100) / 100);
+    // Optimistically update local state for instant tactile UI responsiveness
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, quantity: newQty } : i))
+    );
+    try {
+      await updateInventoryItem(item.id, { quantity: newQty });
+      loadSummary();
+    } catch (err) {
+      console.error('Failed to update item quantity:', err);
+      // Revert if server fails
+      loadItems();
+    }
+  };
 
   // Initial load and whenever filters change
   useEffect(() => {
@@ -246,6 +273,19 @@ export default function InventoryPage() {
     }
   };
 
+  // Phase 10: Handle Waste logging
+  const handleOpenWasteModal = (item) => {
+    setItemForWaste(item);
+    setIsWasteModalOpen(true);
+  };
+
+  const handleWasteRecorded = async (record) => {
+    setActionSuccess(`Recorded food waste for "${record?.ingredientName || 'item'}". Stock updated.`);
+    setIsWasteModalOpen(false);
+    setItemForWaste(null);
+    await Promise.all([loadItems(), loadSummary()]);
+  };
+
   return (
     <div className={styles.container}>
       {/* Page Header */}
@@ -261,15 +301,35 @@ export default function InventoryPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenAddModal}
-          className={`btn btn-primary ${styles.addBtn}`}
-          id="add-inventory-item-button"
-        >
-          <Plus size={18} />
-          <span>Add Ingredient</span>
-        </button>
+        <div className={styles.headerActions}>
+          <Link
+            to="/recipes?tab=canCook"
+            className={`btn btn-secondary ${styles.headerLinkBtn}`}
+            title="See which recipes you can cook with your inventory"
+            id="cook-with-inventory-header-button"
+          >
+            <Utensils size={16} />
+            <span>Cook with Inventory</span>
+          </Link>
+          <Link
+            to="/ai-assistant?prompt=What%20dishes%20can%20I%20cook%20right%20now%20with%20my%20available%20kitchen%20inventory%20items%3F"
+            className={`btn btn-secondary ${styles.headerLinkBtn}`}
+            title="Ask AI Chef to plan meals from your current stock"
+            id="ask-chef-ai-header-button"
+          >
+            <Sparkles size={16} />
+            <span>Ask Chef AI</span>
+          </Link>
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className={`btn btn-primary ${styles.addBtn}`}
+            id="add-inventory-item-button"
+          >
+            <Plus size={18} />
+            <span>Add Ingredient</span>
+          </button>
+        </div>
       </div>
 
       {/* Action Notification Banner */}
@@ -553,9 +613,30 @@ export default function InventoryPage() {
                         </td>
 
                         <td className={styles.quantityCell}>
-                          <span className={styles.quantityValue}>
-                            {item.quantity} <span className={styles.unitText}>{item.unit}</span>
-                          </span>
+                          <div className={styles.qtyStepper}>
+                            <button
+                              type="button"
+                              onClick={(e) => handleQuickAdjustQuantity(item, -1, e)}
+                              disabled={item.quantity <= 0}
+                              className={styles.qtyStepperBtn}
+                              title="Decrease quantity by 1"
+                              aria-label={`Decrease quantity of ${item.name}`}
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span className={styles.quantityValue}>
+                              {item.quantity} <span className={styles.unitText}>{item.unit}</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => handleQuickAdjustQuantity(item, 1, e)}
+                              className={styles.qtyStepperBtn}
+                              title="Increase quantity by 1"
+                              aria-label={`Increase quantity of ${item.name}`}
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
                         </td>
 
                         <td className={styles.thresholdCell}>
@@ -596,6 +677,22 @@ export default function InventoryPage() {
 
                         <td className={styles.actionsCell}>
                           <div className={styles.actionButtons}>
+                            <Link
+                              to={`/recipes?search=${encodeURIComponent(item.name)}`}
+                              className={styles.actionBtnRecipe}
+                              title={`Find recipes using ${item.name}`}
+                              aria-label={`Find recipes using ${item.name}`}
+                            >
+                              <Utensils size={14} />
+                            </Link>
+                            <Link
+                              to={`/ai-assistant?prompt=${encodeURIComponent(`What delicious recipes or dishes can I cook using my available ${item.name} (${item.quantity} ${item.unit})?`)}`}
+                              className={styles.actionBtnAi}
+                              title={`Ask AI Chef what to cook with ${item.name}`}
+                              aria-label={`Ask AI Chef about ${item.name}`}
+                            >
+                              <Sparkles size={14} />
+                            </Link>
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(item)}
@@ -603,7 +700,16 @@ export default function InventoryPage() {
                               title={`Edit ${item.name}`}
                               aria-label={`Edit ${item.name}`}
                             >
-                              <Edit2 size={15} />
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenWasteModal(item)}
+                              className={styles.actionBtnWaste}
+                              title={`Record food waste for ${item.name}`}
+                              aria-label={`Record waste for ${item.name}`}
+                            >
+                              <AlertTriangle size={14} />
                             </button>
                             <button
                               type="button"
@@ -612,7 +718,7 @@ export default function InventoryPage() {
                               title={`Delete ${item.name}`}
                               aria-label={`Delete ${item.name}`}
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={14} />
                             </button>
                           </div>
                         </td>
@@ -639,6 +745,7 @@ export default function InventoryPage() {
             setItemToEdit(null);
           }
         }}
+        onSubmit={handleSaveItem}
         onSave={handleSaveItem}
         initialData={itemToEdit}
         loading={itemModalLoading}
@@ -659,6 +766,19 @@ export default function InventoryPage() {
         loading={deleteLoading}
         serverError={deleteError}
       />
+
+      {/* Phase 10: Food Waste Recording Modal */}
+      {isWasteModalOpen && (
+        <RecordWasteModal
+          isOpen={isWasteModalOpen}
+          onClose={() => {
+            setIsWasteModalOpen(false);
+            setItemForWaste(null);
+          }}
+          onSuccess={handleWasteRecorded}
+          preselectedItem={itemForWaste}
+        />
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ export default function AddToInventoryModal({
     setSubmitting(true);
     try {
       await onConfirmAdd({
+        category: location,
         location,
         expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null
       });
@@ -32,7 +33,9 @@ export default function AddToInventoryModal({
     }
   };
 
-  const qty = item.actualQuantity || item.quantity;
+  const itemName = item.ingredientName || item.name || 'Item';
+  const qty = item.purchasedQuantity || item.actualQuantity || item.quantity;
+  const unit = item.purchasedUnit || item.unit;
 
   return (
     <div className={styles.overlay} onClick={onClose} role="dialog" aria-modal="true">
@@ -45,7 +48,7 @@ export default function AddToInventoryModal({
             <div>
               <h3>Add to Kitchen Inventory</h3>
               <span className={styles.itemSubtitle}>
-                {item.name} ({qty} {item.unit})
+                {itemName} ({qty} {unit})
               </span>
             </div>
           </div>
@@ -60,11 +63,11 @@ export default function AddToInventoryModal({
           <div className={styles.previewBox}>
             <div className={styles.previewRow}>
               <span>Ingredient:</span>
-              <strong>{item.name}</strong>
+              <strong>{itemName}</strong>
             </div>
             <div className={styles.previewRow}>
               <span>Quantity to Add:</span>
-              <strong>{qty} {item.unit}</strong>
+              <strong>{qty} {unit}</strong>
             </div>
             <div className={styles.previewRow}>
               <span>Category:</span>

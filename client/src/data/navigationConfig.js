@@ -21,7 +21,7 @@ export const navigationItems = [
     path: '/ai-assistant',
     label: 'AI Kitchen Assistant',
     iconName: 'Sparkles',
-    description: 'Interact with the Gemini-powered AI culinary assistant for recipes and substitutions.'
+    description: 'Interact with the AI culinary assistant for recipes and substitutions.'
   },
   {
     path: '/meal-planner',

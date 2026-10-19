@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, Sparkles, Clock, Flame, IndianRupee } from 'lucide-react';
+import { X } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters.js';
 import styles from './RecipeDetailModal.module.css';
 
@@ -33,14 +33,6 @@ export default function RecipeDetailModal({ recipe, onClose }) {
         </div>
 
         <div className={styles.body}>
-          {/* Clear Phase 1 Scope Boundary Notice */}
-          <div className={styles.bannerNotice}>
-            <Sparkles size={20} style={{ flexShrink: 0, marginTop: 2 }} />
-            <div>
-              <strong>Phase 1 Recipe Preview:</strong> This preview provides demonstration metadata.
-              Full step-by-step interactive cooking guides, dynamic portion adjustment, and Gemini AI recipe variations will be integrated in Phase 2.
-            </div>
-          </div>
 
           <p>{recipe.description}</p>
 
@@ -71,7 +63,7 @@ export default function RecipeDetailModal({ recipe, onClose }) {
 
         <div className={styles.footer}>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
-            Close Preview
+            Close
           </button>
         </div>
       </div>

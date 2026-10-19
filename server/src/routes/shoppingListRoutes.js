@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/authMiddleware.js';
+import { aiRateLimiter } from '../middleware/aiRateLimiter.js';
 import * as controller from '../controllers/shoppingListController.js';
 
 const router = Router();
@@ -25,10 +26,11 @@ router.delete('/:id', controller.deleteShoppingList);
 // Summary & Optimisation
 router.get('/:id/summary', controller.getShoppingListById);
 router.get('/:id/optimisation', controller.getOptimisation);
-router.post('/:id/ai-advice', controller.getAiAdvice);
+router.post('/:id/ai-advice', aiRateLimiter, controller.getAiAdvice);
 router.post('/:id/generate-from-meal-plan', controller.generateFromMealPlan);
 
 // Items CRUD
+router.post('/:id/items/bulk', controller.addBulkItems);
 router.post('/:id/items', controller.addItem);
 router.patch('/:id/items/:itemId', controller.updateItem);
 router.delete('/:id/items/:itemId', controller.deleteItem);

@@ -10,7 +10,7 @@ export const SEED_RECIPES = [
     servings: 3,
     difficulty: 'Easy',
     description: 'A comforting, lightly spiced one-pot rice pilaf loaded with vegetables. Perfect for utilizing pantry rice and fresh veggies.',
-    imageUrl: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/vegetable-pulao.jpg',
     instructions: '1. Rinse and soak Basmati Rice for 20 minutes.\n2. Heat oil or ghee in a pan, add cumin seeds and sliced onions until translucent.\n3. Add diced carrots and peas, sauté for 2 minutes.\n4. Add drained rice and 3.5 cups water with salt.\n5. Cover and simmer on low heat for 15 minutes until liquid is absorbed.',
     ingredients: [
       { name: 'Basmati Rice', quantity: 2, unit: 'cups', isOptional: false },
@@ -30,7 +30,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'Scrambled cottage cheese tossed with sautéed onions, tomatoes, and aromatic Indian spices. High in protein and ready in minutes.',
-    imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/paneer-bhurji.jpg',
     instructions: '1. Crumble fresh paneer by hand.\n2. Heat oil in a pan, sauté finely chopped onions and green chilies until soft.\n3. Add chopped tomatoes and turmeric; cook until mushy.\n4. Fold in crumbled paneer and salt. Sauté gently on medium heat for 2-3 minutes.\n5. Garnish with chopped coriander and serve hot with toast or roti.',
     ingredients: [
       { name: 'Paneer', quantity: 250, unit: 'g', isOptional: false },
@@ -50,7 +50,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'Rich, aromatic tomato sauce simmered with garlic and tossed with al dente pasta and sweet fresh basil leaves.',
-    imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281024?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/tomato-basil-pasta.jpg',
     instructions: '1. Boil pasta in generously salted water until al dente.\n2. In a skillet, heat olive oil and gently sauté sliced garlic until fragrant.\n3. Add chopped fresh tomatoes and simmer for 10 minutes until a rich sauce forms.\n4. Toss cooked pasta into the sauce with fresh torn basil leaves.\n5. Serve immediately with a sprinkle of grated parmesan cheese.',
     ingredients: [
       { name: 'Pasta', quantity: 200, unit: 'g', isOptional: false },
@@ -70,7 +70,7 @@ export const SEED_RECIPES = [
     servings: 4,
     difficulty: 'Easy',
     description: 'Comforting yellow lentils tempered with ghee, cumin seeds, garlic, and ripe tomatoes. A staple vegetarian meal.',
-    imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/dal-tadka.jpg',
     instructions: '1. Pressure cook Toor Dal with water, turmeric, and salt for 3-4 whistles until soft.\n2. In a small pan, heat ghee and temper cumin seeds and crushed garlic.\n3. Add onions and chopped tomatoes, cooking until tomatoes release oil.\n4. Pour the tadka over cooked dal and simmer for 5 minutes.\n5. Serve warm with steamed basmati rice.',
     ingredients: [
       { name: 'Toor Dal', quantity: 1, unit: 'cups', isOptional: false },
@@ -91,7 +91,7 @@ export const SEED_RECIPES = [
     servings: 3,
     difficulty: 'Easy',
     description: 'Golden, crispy potato wedges seasoned with garlic powder, paprika, and sea salt. Healthier and full of flavor.',
-    imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/potato-wedges.jpg',
     instructions: '1. Wash potatoes thoroughly and cut into uniform wedges.\n2. Toss wedges in a bowl with olive oil, salt, garlic powder, and paprika.\n3. Arrange in a single layer on a lined baking tray.\n4. Bake at 200°C (400°F) for 25 minutes, flipping halfway until golden and crispy.\n5. Serve hot with your favorite dip.',
     ingredients: [
       { name: 'Potatoes', quantity: 3, unit: 'pcs', isOptional: false },
@@ -110,7 +110,7 @@ export const SEED_RECIPES = [
     servings: 1,
     difficulty: 'Easy',
     description: 'Savory rolled oats cooked with fresh tomatoes, green peas, and mild spices. Ready in under 15 minutes.',
-    imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/masala-oats.jpg',
     instructions: '1. Sauté finely chopped onions and tomatoes in a teaspoon of oil.\n2. Add green peas, turmeric powder, and salt.\n3. Pour in 2 cups of water and bring to a rolling boil.\n4. Stir in oats and cook for 3-4 minutes until creamy.\n5. Serve warm as a hearty, fiber-rich breakfast or snack.',
     ingredients: [
       { name: 'Oats', quantity: 1, unit: 'cups', isOptional: false },
@@ -129,7 +129,7 @@ export const SEED_RECIPES = [
     servings: 3,
     difficulty: 'Medium',
     description: 'Tender cottage cheese cubes simmered in a vibrant, spiced baby spinach puree. Rich in iron and calcium.',
-    imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/palak-paneer.jpg',
     instructions: '1. Blanch spinach in boiling water for 2 minutes, then plunge into cold water and puree.\n2. Sauté chopped onions, garlic, and tomato puree until cooked through.\n3. Pour in the spinach puree and simmer for 5 minutes.\n4. Gently stir in paneer cubes and garam masala.\n5. Simmer for 2 minutes, swirl with cream if desired, and serve with naan or roti.',
     ingredients: [
       { name: 'Spinach', quantity: 300, unit: 'g', isOptional: false },
@@ -150,7 +150,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'Parsi-style spiced soft scrambled eggs packed with onions, tomatoes, and green chilies. Soft, creamy, and satisfying.',
-    imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/scrambled-eggs-akuri.jpg',
     instructions: '1. Whisk eggs in a bowl with a splash of milk and salt.\n2. Melt butter in a non-stick pan, sauté onions, green chilies, and tomatoes until soft.\n3. Lower heat, pour in whisked eggs.\n4. Stir continuously with a spatula until soft curds form.\n5. Remove while still slightly creamy and serve immediately on buttered toast.',
     ingredients: [
       { name: 'Eggs', quantity: 3, unit: 'pcs', isOptional: false },
@@ -170,7 +170,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'Tender button mushrooms seared in garlic-infused butter with cracked black pepper and fresh herbs.',
-    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/garlic-mushrooms.jpg',
     instructions: '1. Wipe mushrooms clean with a damp cloth and slice in half.\n2. Melt butter in a heavy skillet over medium-high heat.\n3. Add mushrooms in a single layer and sear without disturbing for 3 minutes.\n4. Add minced garlic, salt, and black pepper, tossing for another 2 minutes.\n5. Garnish with chopped parsley and serve warm.',
     ingredients: [
       { name: 'Mushrooms', quantity: 250, unit: 'g', isOptional: false },
@@ -189,7 +189,7 @@ export const SEED_RECIPES = [
     servings: 3,
     difficulty: 'Easy',
     description: 'Boiled potatoes pan-roasted with fragrant cumin seeds, green chilies, and turmeric. Simple everyday comfort food.',
-    imageUrl: 'https://images.unsplash.com/photo-1606471191009-63994c53433b?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/aloo-jeera.jpg',
     instructions: '1. Boil and peel potatoes, then cut into bite-sized cubes.\n2. Heat oil, add cumin seeds until they splutter and turn fragrant.\n3. Add chopped green chilies, turmeric powder, and potato cubes.\n4. Toss on medium flame for 5-7 minutes until edges are crisp and golden.\n5. Season with salt and fresh coriander leaves.',
     ingredients: [
       { name: 'Potatoes', quantity: 3, unit: 'pcs', isOptional: false },
@@ -209,7 +209,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'A swift wok-tossed fried rice using leftover cold rice, diced carrots, bell peppers, garlic, and soy sauce.',
-    imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/vegetable-fried-rice.jpg',
     instructions: '1. Use cold cooked rice for best texture.\n2. Heat a wok with oil on high heat, add minced garlic and finely diced veggies.\n3. Stir fry briskly for 2 minutes keeping veggies crisp.\n4. Add rice, soy sauce, and a pinch of black pepper.\n5. Toss vigorously on high heat for 3 minutes until steaming hot.',
     ingredients: [
       { name: 'Basmati Rice', quantity: 2, unit: 'cups', isOptional: false },
@@ -229,7 +229,7 @@ export const SEED_RECIPES = [
     servings: 2,
     difficulty: 'Easy',
     description: 'Refreshing bowl of seasonal apples, bananas, and oranges tossed with honey and finely chopped garden mint.',
-    imageUrl: 'https://images.unsplash.com/photo-1490474418585-fb9bad8a0e72?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/fruit-medley.jpg',
     instructions: '1. Peel and chop apples, bananas, and oranges into bite-sized chunks.\n2. Place fruit into a chilled mixing bowl.\n3. Drizzle with honey and toss gently with finely sliced fresh mint leaves.\n4. Serve immediately chilled.',
     ingredients: [
       { name: 'Apples', quantity: 1, unit: 'pcs', isOptional: false },

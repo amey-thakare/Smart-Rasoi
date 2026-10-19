@@ -25,6 +25,7 @@ model User {
   ingredientPrices IngredientPrice[]
   dietaryProfile   DietaryProfile?
   mealHistory      MealConsumptionHistory[]
+  foodWasteRecords FoodWasteRecord[]
   monthlyBudget    Float?
   weeklyBudget     Float?
 
@@ -47,6 +48,7 @@ model InventoryItem {
   user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   consumptions      MealPlanConsumption[]
   shoppingListItems ShoppingListItem[]
+  foodWasteRecords  FoodWasteRecord[]
 
   @@index([userId])
   @@index([expiryDate])
@@ -282,6 +284,34 @@ model MealConsumptionHistory {
   @@index([userId])
   @@index([consumedDate])
   @@index([mealPlanId])
+  @@index([isReversed])
+}
+
+model FoodWasteRecord {
+  id                  String         @id @default(cuid())
+  userId              String
+  inventoryItemId     String?
+  ingredientName      String
+  quantityWasted      Float
+  unit                String
+  reason              String         // EXPIRED, SPOILED, EXCESS_PREPARED, OVER_PURCHASED, COOKING_MISTAKE, OTHER
+  estimatedUnitCost   Float?
+  estimatedTotalCost  Float?
+  wastedAt            DateTime       @default(now())
+  notes               String?
+  isReversed          Boolean        @default(false)
+  reversedAt          DateTime?
+  reversalReason      String?
+  restoredToInventory Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inventoryItem       InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([wastedAt])
+  @@index([reason])
+  @@index([ingredientName])
   @@index([isReversed])
 }
 

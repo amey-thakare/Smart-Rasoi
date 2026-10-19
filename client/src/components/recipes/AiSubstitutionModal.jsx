@@ -105,7 +105,7 @@ export default function AiSubstitutionModal({
             </div>
             <div>
               <h2 className={styles.title}>Ingredient Substitutions</h2>
-              <p className={styles.subtitle}>Smart, culinary-tested alternatives powered by Gemini</p>
+              <p className={styles.subtitle}>Smart, culinary-tested alternatives powered by AI</p>
             </div>
           </div>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close modal">

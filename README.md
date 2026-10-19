@@ -670,10 +670,41 @@ npm run check
 25. **Phase 8: Dashboard Integration (`/dashboard`)**:
     - Navigate to `/dashboard`.
     - Review the **Smart Grocery Shopping & Budget** widget displaying active lists, pending items count, monthly budget progress bar, and recent purchases.
+26. **Phase 9: Nutrition & Dietary Tracking (`/nutrition`)**:
+    - Navigate to `/nutrition` in the sidebar or via the Dashboard summary card.
+    - Set personal daily targets (Calories, Protein, Carbs, Fat, Fiber, Sodium) and dietary preferences / allergies in **"Set Dietary Goals"**.
+    - Observe the Daily Tracker hero card and macro progress bars comparing consumed nutrients with your goals.
+    - Click **"Log Meal"** to record custom foods or log any recipe from your kitchen collection with real-time serving-scaled nutrition previews.
+    - Cook a meal in the Meal Planner (`/meal-planner`) and confirm that consumption snapshots are automatically recorded. Reversing the cooking action safely reverses the consumption record.
+    - Click **"Weekly Trends & Averages"** to review the 7-day intake chart and accurate daily averages (averaged strictly across active days).
+    - Click **"AI Nutritionist"** to receive contextual advice, macro balance evaluations, and healthy ingredient swaps powered by Chef Gemini.
 
 ---
 
-## 12. Gemini Configuration & Troubleshooting
+## 13. Phase 9 Architecture: Nutrition Analysis, Dietary Tracking & Meal History
+
+### Key Capabilities
+- **Deterministic Nutritional Engine**:
+  - Grounded in standardized Indian Food Composition Tables (IFCT) and USDA food data.
+  - Computes Calories, Protein, Carbohydrates, Fat, Fiber, Sugar, and Sodium per serving and total.
+  - Honest completeness scoring and missing ingredients disclosures.
+- **Dietary Profile & Health Targets**:
+  - Daily calorie & macro target monitoring with real-time percentage progress.
+  - Food allergy safeguards and excluded ingredient tagging.
+- **Consumption Ledger & Cooking Integration**:
+  - Automated snapshots when meals are marked as cooked in the Meal Planner.
+  - Strict cooking reversal tracking (`isReversed: true`) that discounts reversed meals from daily/weekly totals.
+  - Manual custom food entry and quick recipe intake logs.
+- **Weekly Trend Analytics**:
+  - 7-day CSS interactive pattern chart.
+  - Daily averages calculated strictly across days with recorded consumption (missing days are never assumed to be 0 kcal).
+- **Context-Grounded AI Nutrition Assistant**:
+  - Connects to Google Gemini with authentic user dietary context, today's meals, and kitchen inventory.
+  - Offline rule-based fallback and clear culinary guidance disclaimers.
+
+---
+
+## 14. Gemini Configuration & Troubleshooting
 
 ### Environment Configuration (`server/.env`)
 ```env
@@ -697,6 +728,123 @@ Smart Rasoi uses `gemini-3.5-flash` by default. If the configured model returns 
 | **502 Bad Gateway / Auth Error** | The configured `GEMINI_API_KEY` is invalid, expired, or revoked | Verify that the key is active and correctly formatted in `server/.env` without leading or trailing spaces. |
 | **502 Bad Gateway / Model Error** | The configured `GEMINI_MODEL` is unavailable or deprecated | Set `GEMINI_MODEL=gemini-3.5-flash` in `server/.env`. |
 | **429 Too Many Requests** | (a) In-memory rate limiter exceeded (>25 requests/min per user), or (b) Google Gemini quota exceeded | Wait 60 seconds before sending more requests. Check quota usage in the Google Cloud Console. |
-| **504 Gateway Timeout** | Gemini generation took longer than `GEMINI_TIMEOUT_MS` (default 25s) | Check network stability or increase `GEMINI_TIMEOUT_MS=35000` in `server/.env`. |
+---
 
-# java-project
+## 15. Phase 10: Food-Waste Analytics, Expiry Tracking & Waste Reduction
+
+### Overview
+Phase 10 equips Smart Rasoi with comprehensive food-waste tracking, proactive expiry monitoring, and kitchen sustainability analytics. It bridges active inventory tracking with meal planning to rescue at-risk ingredients before spoilage occurs, logs unavoidable waste with root-cause categorization, and computes authentic financial loss (₹ INR) grounded in real grocery price records.
+
+### Key Capabilities
+
+#### 1. Inventory Expiry Categorisation & Urgency Scoring
+- Every inventory ingredient is classified into one of 6 standardized freshness tiers based on midnight-anchored local time boundaries:
+  - `EXPIRED`: Past consumption date.
+  - `EXPIRING_TODAY`: Expires by the end of today (urgent priority).
+  - `EXPIRING_IN_3_DAYS`: Expires within 1 to 3 days (critical rescue window).
+  - `EXPIRING_IN_7_DAYS`: Expires within 4 to 7 days (near-term planning).
+  - `LONGER_SHELF_LIFE`: Shelf life exceeding 7 days.
+  - `NO_EXPIRY_DATE`: Non-perishable or unassigned shelf life.
+- Sorted by urgency score (`daysRemaining` asc, nulls last) with urgent visual badges throughout the application.
+
+#### 2. Atomic Waste Logging & Inventory Deductions
+- **Model (`FoodWasteRecord`)**: Records `ingredientName`, `category`, `quantityWasted`, `unit`, `reason`, `estimatedTotalCost`, `notes`, `discardedAt`, and optional foreign key `inventoryItemId`.
+- **Atomic Balance Deduction**: When waste is logged from active inventory, `wasteService.recordFoodWaste` runs inside a Prisma database transaction that checks available stock and deducts the discarded amount, rejecting negative stock with `400 Bad Request`.
+- **Standalone Support**: Allows logging unlisted or prepared dishes (e.g., leftover dal, spoiled rice) without requiring an inventory item reference.
+- **Authentic Price Resolution**: If estimated financial loss is omitted, the service looks up verified unit price history (`getLatestPriceForIngredient`) and computes authentic loss in ₹ INR.
+
+#### 3. Waste Correction & Audit Reversals
+- **Permanent Audit Trail**: Discard records are never permanently hard-deleted. Reversals mark `isReversed: true` with a mandatory `reversalReason` and `reversedAt` timestamp.
+- **Idempotency Guard**: Attempting to reverse an already reversed record returns `400 Bad Request`.
+- **Optional Inventory Restoration**: When `restoreToInventory: true`, the exact discarded quantity is credited back to the original inventory item if it still exists.
+- **Analytics Isolation**: Reversed records are automatically excluded from waste loss metrics, incident counts, and top-wasted calculations.
+
+#### 4. Multi-Period Waste Analytics & Safe Unit Grouping
+- Filters by `7d` (last 7 days), `30d` (last 30 days), `month` (current calendar month), and `all` (all time).
+- Computes:
+  - Total waste incidents and financial loss (₹ INR).
+  - Root cause breakdown (`EXPIRED`, `SPOILED`, `EXCESS_PREPARED`, `OVER_PURCHASED`, `COOKING_MISTAKE`, `OTHER`).
+  - **Safe Unit Aggregation**: Sums quantities strictly by compatible unit keys (e.g. `2.5 kg`, `500 ml`, `4 piece`), never mixing grams with litres or pieces into a meaningless number.
+  - Top 5 most discarded ingredients with cost impact and primary cause.
+
+#### 5. At-Risk Inventory Cross-Referenced with Meal Plans
+- Detects ingredients with $\le 7$ days of shelf life.
+- Queries upcoming scheduled meals (`MealPlanEntry`) and checks if at-risk ingredients are planned.
+- Flags each item as either:
+  - `isCoveredByMealPlan: true`: Scheduled for cooking.
+  - `UNCOVERED RISK`: At-risk ingredient with no planned meal, highlighting urgency for the cook.
+
+#### 6. Expiry-Aware Recipe Rescuer
+- Scans user recipes and community seed recipes to find dishes that use ingredients expiring within 7 days.
+- Excludes already expired stock from recipe matching.
+- Highlights rescued items and provides a one-click transition to view recipe instructions or add to the meal plan.
+
+#### 7. AI Waste Reduction Advisor & Food Safety Rules
+- Conversational culinary preservation assistant powered by Google Gemini with safe offline rule fallbacks.
+- **Non-Negotiable Food Safety Principle**: Enforces that boiling, reheating, or cooking will NOT eliminate bacterial enterotoxins (e.g. *Bacillus cereus* or *Staphylococcus aureus*). Items with mold, foul odors, or broken cold chain must always be safely discarded.
+- Provides actionable storage hacks, pickling/freezing guidance, and low-waste repurposing ideas for Indian produce.
+
+### Phase 10 API Reference Table
+
+| Method | Endpoint | Protection | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/waste/expiry` | Protected | Returns categorized inventory items across all 6 shelf life tiers and summary counts |
+| `GET` | `/api/waste/records` | Protected | Lists paginated waste records with filter by reason and search query |
+| `POST` | `/api/waste/records` | Protected | Records food waste, atomically deducts active inventory, and computes financial loss |
+| `POST` | `/api/waste/records/:id/reverse` | Protected | Confirms reversal of a waste record with audit trail and optional inventory restoration |
+| `GET` | `/api/waste/analytics` | Protected | Computes aggregate waste metrics, financial loss in ₹, reason breakdowns, and safe unit totals |
+| `GET` | `/api/waste/at-risk` | Protected | Identifies near-expiry ingredients and cross-references upcoming meal plan coverage |
+| `GET` | `/api/waste/recipe-suggestions`| Protected | Suggests recipes utilizing ingredients expiring within 7 days, excluding expired stock |
+| `GET` | `/api/waste/summary` | Protected | Returns real-time metrics for the Dashboard Waste Awareness card |
+| `POST` | `/api/waste/ai-advice` | Protected | Gemini culinary preservation coach with offline safety fallbacks |
+
+---
+
+## 16. Phase 11: Final Integration, Security Audit & End-to-End Testing
+
+### Overview
+Phase 11 marks the culmination of the planned 10-phase Smart Rasoi platform. This quality assurance and stabilization phase audited all 10 core subsystems, validated cross-feature workflows under concurrent conditions, hardened API security against IDOR and AI burst exploitation, verified schema migration integrity on fresh databases, and confirmed live Google Gemini integration.
+
+### Summary of System Audits & Hardening
+
+1. **Comprehensive Cross-Feature End-to-End Integration Suite**:
+   - Location: `server/src/tests/integration.e2e.test.js`
+   - Validates the complete multi-feature lifecycle in a unified execution flow:
+     - User registration, password hashing verification, and safe profile updates.
+     - Kitchen inventory management, recipe creation, and dynamic recipe matching (`canCook` engine).
+     - Meal planning, preview generation (verifying zero premature deductions), atomic cooking deduction, 409 idempotency rejection, and consumption reversal with exact quantity restoration.
+     - Shopping list generation from meal plan shortfalls, purchase recording with price history, and idempotent kitchen inventory addition.
+     - Dietary profile goal updates, meal consumption logging, and daily nutritional summary comparisons.
+     - Food waste logging with atomic stock deductions, analytical breakdowns by safe unit, and audit reversal with stock restoration.
+     - Strict IDOR (Insecure Direct Object Reference) prevention verifying that unauthorized users receive `404 Not Found` when attempting to access or mutate other users' inventory, waste records, or shopping lists.
+     - AI sliding-window rate limiting ensuring protection against abusive request loops.
+
+2. **Security & Protection Hardening**:
+   - **AI Endpoint Rate Limiting**: Added `aiRateLimiter` middleware protection to all AI entry points across the backend:
+     - `POST /api/ai/chat` (AI Kitchen Assistant)
+     - `POST /api/ai/recipes/generate` (AI Recipe Generator)
+     - `POST /api/ai/recipes/:id/modify` (AI Recipe Modifier)
+     - `POST /api/ai/substitutions` (Ingredient Substitutions)
+     - `POST /api/shopping-lists/:id/ai-advice` (Shopping Budget Advisor)
+     - `POST /api/nutrition/assistant` (AI Nutrition Advisor)
+     - `POST /api/waste/ai-advice` (AI Food Waste & Spoilage Advisor)
+   - **Credentials & Environment Safety**: Excluded all `.env*`, `*.db`, and `*.db-journal` files from Git tracking via `.gitignore`. Verified that no production API keys, passwords, or tokens are logged or exposed to the client.
+   - **Transaction Isolation & Atomicity**: All inventory balance deductions (cooking, food waste, shopping list inventory addition) operate inside `prisma.$transaction` blocks with re-validation inside the transaction boundary, strictly preventing race conditions or negative quantities.
+   - **Clean Schema Migration Verification**: Tested on a temporary fresh SQLite database; all 7 migrations applied sequentially with zero schema inconsistencies.
+
+3. **Live Gemini Integration Verification**:
+   - Verified live API connectivity against Google Gemini API using `@google/genai` (v2.28.0) and model `gemini-3.5-flash-lite` / `gemini-2.5-flash`.
+   - Confirmed timeout handling, input sanitization, safe offline fallback behaviors, and structured JSON parsing.
+
+### How to Run Project Checks Locally
+
+```bash
+# Run all backend unit, integration, and E2E tests (143 tests across 22 suites)
+npm test
+
+# Run full project verification: backend tests + client production Vite build
+npm run check
+
+# Start development servers (Express backend on :5001 + Vite React client on :5173)
+npm run dev
+```

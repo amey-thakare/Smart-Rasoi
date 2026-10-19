@@ -37,7 +37,7 @@ export default function AddShoppingItemModal({
   onSave,
   initialData = null
 }) {
-  const [name, setName] = useState(initialData?.name || '');
+  const [name, setName] = useState(initialData?.ingredientName || initialData?.name || '');
   const [category, setCategory] = useState(initialData?.category || 'Produce');
   const [quantity, setQuantity] = useState(initialData?.quantity !== undefined ? initialData.quantity : 1);
   const [unit, setUnit] = useState(initialData?.unit || 'piece');
@@ -77,6 +77,7 @@ export default function AddShoppingItemModal({
     try {
       await onSave({
         name: name.trim(),
+        ingredientName: name.trim(),
         category,
         quantity: qty,
         unit: unit.trim().toLowerCase(),

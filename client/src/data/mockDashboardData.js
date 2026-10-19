@@ -109,7 +109,7 @@ export const mockFeaturedRecipes = [
     calories: 320,
     dietary: 'Vegetarian',
     estimatedCost: 120,
-    imageUrl: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/vegetable-pulao.jpg',
     fallbackEmoji: '🍚',
     keyIngredients: ['Basmati Rice', 'Green Peas', 'Carrots', 'Whole Spices'],
     description: 'A comforting, lightly spiced one-pot rice pilaf loaded with vegetables. Perfect for utilizing pantry rice and fresh veggies.',
@@ -123,7 +123,7 @@ export const mockFeaturedRecipes = [
     calories: 280,
     dietary: 'High Protein',
     estimatedCost: 140,
-    imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/paneer-bhurji.jpg',
     fallbackEmoji: '🍳',
     keyIngredients: ['Paneer', 'Tomatoes', 'Onions', 'Turmeric', 'Coriander'],
     description: 'Scrambled cottage cheese tossed with sauteed onions, ginger, and ripe tomatoes. High in protein and ready in under 20 minutes.',
@@ -137,7 +137,7 @@ export const mockFeaturedRecipes = [
     calories: 180,
     dietary: 'Vegan / Low Cal',
     estimatedCost: 65,
-    imageUrl: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
+    imageUrl: '/images/recipes/tomato-basil-pasta.jpg',
     fallbackEmoji: '🥣',
     keyIngredients: ['Ripe Tomatoes', 'Garlic', 'Olive Oil', 'Fresh Basil'],
     description: 'Slow-roasted vine tomatoes blended with garlic and aromatic herbs. The best way to use up ripe tomatoes nearing their expiry.',
@@ -227,6 +227,6 @@ export const mockQuickActions = [
     description: 'Get recipe adaptations and substitution ideas.',
     path: '/ai-assistant',
     iconName: 'Sparkles',
-    badgeText: 'Gemini AI'
+    badgeText: 'Smart AI'
   }
 ];

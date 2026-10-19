@@ -1,0 +1,18 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Database and WAL journals
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+dev.db-journal
+test.db
+test.db-journal
+
+# Logs & temp
+*.log
+npm-debug.log*

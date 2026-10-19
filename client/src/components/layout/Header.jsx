@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Bell, Menu, X, ChevronDown, User, LogOut, Settings } from 'lucide-react';
-import { useHealthCheck } from '../../hooks/useHealthCheck.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import styles from './Header.module.css';
 
@@ -13,7 +12,6 @@ export default function Header({ title = 'Dashboard', onToggleMobileMenu }) {
   const notifRef = useRef(null);
   const profileRef = useRef(null);
 
-  const { status: healthStatus } = useHealthCheck();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -82,26 +80,6 @@ export default function Header({ title = 'Dashboard', onToggleMobileMenu }) {
           )}
         </div>
 
-        {/* Real-time backend status indicator */}
-        <div
-          className={styles.apiStatusBadge}
-          title={
-            healthStatus === 'connected'
-              ? 'Backend API is connected (GET /api/health)'
-              : 'Backend is offline or connecting'
-          }
-        >
-          <div
-            className={`${styles.statusDot} ${
-              healthStatus === 'connected'
-                ? styles.dotConnected
-                : healthStatus === 'disconnected'
-                ? styles.dotDisconnected
-                : styles.dotChecking
-            }`}
-          />
-          <span>{healthStatus === 'connected' ? 'API Online' : 'API Standby'}</span>
-        </div>
 
         {/* Demonstration Notification Control */}
         <div className={styles.notifWrapper} ref={notifRef}>
@@ -139,9 +117,6 @@ export default function Header({ title = 'Dashboard', onToggleMobileMenu }) {
                 <span className={styles.notifItemTime}>5 hours ago</span>
               </div>
 
-              <div className={styles.notifFooterNotice}>
-                Demonstration notification state (Phase 1 preview)
-              </div>
             </div>
           )}
         </div>

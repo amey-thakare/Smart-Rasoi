@@ -50,7 +50,7 @@ export class GeminiModelError extends Error {
 }
 
 // Ordered list of candidate models to fallback to in case of model deprecation (404) or demand spikes (503)
-const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+const FALLBACK_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-3.5-flash'];
 
 // Module-level mock client hook for automated testing and isolated CI runs
 let mockGeminiClient = null;
@@ -89,8 +89,8 @@ const getClient = () => {
 export const generateGeminiContent = async ({
   contents,
   systemInstruction,
-  model = env.GEMINI_MODEL || 'gemini-3.5-flash',
-  timeoutMs = env.GEMINI_TIMEOUT_MS || 25000,
+  model = env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+  timeoutMs = env.GEMINI_TIMEOUT_MS || 45000,
   maxOutputTokens = 1500,
   temperature = 0.7
 }) => {
@@ -164,17 +164,7 @@ export const generateGeminiContent = async ({
     // Log safe diagnostic information on server (never log API keys or secrets)
     console.error(`[Gemini API Error] Status: ${errStatus || 'Unknown'}, Code: ${error?.code || 'N/A'}, Message: ${String(error?.message || '').slice(0, 300)}`);
 
-    // 1. Quota & Rate Limits
-    if (
-      errStatus === 429 ||
-      errMsg.includes('429') ||
-      errMsg.includes('resource_exhausted') ||
-      errMsg.includes('quota')
-    ) {
-      throw new GeminiRateLimitError();
-    }
-
-    // 2. Authentication & Permission
+    // 1. Authentication & Permission
     if (
       errStatus === 401 ||
       errStatus === 403 ||
@@ -186,7 +176,7 @@ export const generateGeminiContent = async ({
       throw new GeminiAuthError();
     }
 
-    // 3. Timeouts
+    // 2. Timeouts
     if (
       errMsg.includes('timeout') ||
       errMsg.includes('aborted') ||
@@ -195,7 +185,7 @@ export const generateGeminiContent = async ({
       throw new GeminiTimeoutError();
     }
 
-    // 4. Model Deprecation / Not Found (404) or High Demand / Unavailable (503)
+    // 3. Quota / Rate Limits (429), Deprecated / Not Found (404), or High Demand (503)
     const isModelUnavailable = (
       errStatus === 404 ||
       errMsg.includes('not found') ||
@@ -211,7 +201,14 @@ export const generateGeminiContent = async ({
       errMsg.includes('unavailable')
     );
 
-    if (isModelUnavailable || isHighDemand) {
+    const isRateLimited = (
+      errStatus === 429 ||
+      errMsg.includes('429') ||
+      errMsg.includes('resource_exhausted') ||
+      errMsg.includes('quota')
+    );
+
+    if (isModelUnavailable || isHighDemand || isRateLimited) {
       const candidates = FALLBACK_MODELS.filter((m) => m !== model);
       for (const fallbackModel of candidates) {
         console.warn(`[Gemini Fallback] Model "${model}" failed (${errStatus || 'error'}), attempting automatic fallback to "${fallbackModel}"...`);
@@ -230,6 +227,9 @@ export const generateGeminiContent = async ({
         }
       }
 
+      if (isRateLimited) {
+        throw new GeminiRateLimitError();
+      }
       if (isModelUnavailable) {
         throw new GeminiModelError();
       }

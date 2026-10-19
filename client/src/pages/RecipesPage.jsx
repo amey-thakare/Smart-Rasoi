@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   UtensilsCrossed,
   Plus,
@@ -96,6 +97,20 @@ export default function RecipesPage() {
   const [recipeToSchedule, setRecipeToSchedule] = useState(null);
 
   const requestIdRef = useRef(0);
+  const [searchParams] = useSearchParams();
+
+  // Sync URL search parameters (e.g. from Inventory "Find Recipes" or "Cook with Inventory")
+  useEffect(() => {
+    const q = searchParams.get('search');
+    if (q !== null && q !== undefined) {
+      setSearchQuery(q);
+      setDebouncedSearch(q);
+    }
+    const tab = searchParams.get('tab');
+    if (tab && ['all', 'canCook', 'myRecipes', 'favourites'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Debounce search query
   useEffect(() => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ShoppingCart,
   Plus,
@@ -50,6 +51,9 @@ import PriceHistoryModal from '../components/shopping/PriceHistoryModal.jsx';
 import styles from './ShoppingListPage.module.css';
 
 export default function ShoppingListPage() {
+  const [searchParams] = useSearchParams();
+  const urlListId = searchParams.get('listId');
+
   const [lists, setLists] = useState([]);
   const [selectedListId, setSelectedListId] = useState(null);
   const [activeList, setActiveList] = useState(null);
@@ -126,8 +130,8 @@ export default function ShoppingListPage() {
   }, []);
 
   useEffect(() => {
-    loadLists();
-  }, []);
+    loadLists(urlListId);
+  }, [urlListId]);
 
   useEffect(() => {
     if (selectedListId) {
@@ -178,12 +182,18 @@ export default function ShoppingListPage() {
   // Item CRUD actions
   const handleSaveItem = async (data) => {
     if (!activeList) return;
+    const itemName = data.ingredientName || data.name || 'Item';
+    const payload = {
+      ...data,
+      name: itemName,
+      ingredientName: itemName
+    };
     if (editingItemData) {
-      await updateShoppingListItem(activeList.id, editingItemData.id, data);
-      notify(`Updated item "${data.name}".`);
+      await updateShoppingListItem(activeList.id, editingItemData.id, payload);
+      notify(`Updated item "${itemName}".`);
     } else {
-      await addShoppingListItem(activeList.id, data);
-      notify(`Added "${data.name}" to shopping list.`);
+      await addShoppingListItem(activeList.id, payload);
+      notify(`Added "${itemName}" to shopping list.`);
     }
     setEditingItemData(null);
     await loadActiveList(activeList.id);
@@ -192,10 +202,11 @@ export default function ShoppingListPage() {
 
   const handleDeleteItem = async (itemId, itemName) => {
     if (!activeList) return;
-    if (!window.confirm(`Remove "${itemName}" from this shopping list?`)) return;
+    const displayName = itemName || 'this item';
+    if (!window.confirm(`Remove "${displayName}" from this shopping list?`)) return;
     try {
       await deleteShoppingListItem(activeList.id, itemId);
-      notify(`Removed "${itemName}".`);
+      notify(`Removed "${displayName}".`);
       await loadActiveList(activeList.id);
       await loadLists(activeList.id);
     } catch (err) {
@@ -207,12 +218,17 @@ export default function ShoppingListPage() {
   const handleConfirmPurchase = async (purchaseData) => {
     if (!activeList || !purchaseModalItem) return;
     try {
+      const itemName = purchaseModalItem.ingredientName || purchaseModalItem.name || 'Item';
       // 1. Mark as purchased
       await purchaseShoppingListItem(activeList.id, purchaseModalItem.id, {
+        isPurchased: true,
         purchased: true,
+        purchasedQuantity: purchaseData.actualQuantity,
         actualQuantity: purchaseData.actualQuantity,
+        actualTotalPrice: purchaseData.actualPrice,
         actualPrice: purchaseData.actualPrice,
-        store: purchaseData.store
+        store: purchaseData.store,
+        notes: purchaseData.store
       });
 
       // 2. If user also requested adding to inventory
@@ -220,11 +236,15 @@ export default function ShoppingListPage() {
         await addPurchasedItemToInventory(
           activeList.id,
           purchaseModalItem.id,
-          purchaseData.inventoryData || {}
+          {
+            category: purchaseData.inventoryData?.location || 'Pantry',
+            location: purchaseData.inventoryData?.location || 'Pantry',
+            expiryDate: purchaseData.inventoryData?.expiryDate || null
+          }
         );
-        notify(`Purchased "${purchaseModalItem.name}" and added to kitchen inventory!`);
+        notify(`Purchased "${itemName}" and added to kitchen inventory!`);
       } else {
-        notify(`Marked "${purchaseModalItem.name}" as purchased.`);
+        notify(`Marked "${itemName}" as purchased.`);
       }
 
       setPurchaseModalItem(null);
@@ -237,9 +257,10 @@ export default function ShoppingListPage() {
 
   const handleUnpurchaseItem = async (item) => {
     if (!activeList) return;
+    const itemName = item.ingredientName || item.name || 'Item';
     try {
-      await purchaseShoppingListItem(activeList.id, item.id, { purchased: false });
-      notify(`Marked "${item.name}" as pending.`);
+      await purchaseShoppingListItem(activeList.id, item.id, { isPurchased: false, purchased: false });
+      notify(`Marked "${itemName}" as pending.`);
       await loadActiveList(activeList.id);
       await loadLists(activeList.id);
     } catch (err) {
@@ -249,9 +270,14 @@ export default function ShoppingListPage() {
 
   const handleConfirmAddToInventory = async (inventoryData) => {
     if (!activeList || !addToInventoryModalItem) return;
+    const itemName = addToInventoryModalItem.ingredientName || addToInventoryModalItem.name || 'Item';
     try {
-      await addPurchasedItemToInventory(activeList.id, addToInventoryModalItem.id, inventoryData);
-      notify(`Added "${addToInventoryModalItem.name}" to kitchen inventory!`);
+      await addPurchasedItemToInventory(activeList.id, addToInventoryModalItem.id, {
+        category: inventoryData.location || inventoryData.category || 'Pantry',
+        location: inventoryData.location || inventoryData.category || 'Pantry',
+        expiryDate: inventoryData.expiryDate || null
+      });
+      notify(`Added "${itemName}" to kitchen inventory!`);
       setAddToInventoryModalItem(null);
       await loadActiveList(activeList.id);
     } catch (err) {
@@ -273,9 +299,10 @@ export default function ShoppingListPage() {
 
   // Filter items of the active list
   const filteredItems = (activeList?.items || []).filter((item) => {
+    const isItemPurchased = Boolean(item.isPurchased ?? item.purchased);
     // Status filter
-    if (itemFilter === 'pending' && item.purchased) return false;
-    if (itemFilter === 'purchased' && !item.purchased) return false;
+    if (itemFilter === 'pending' && isItemPurchased) return false;
+    if (itemFilter === 'purchased' && !isItemPurchased) return false;
 
     // Category filter
     if (categoryFilter !== 'all' && (item.category || 'Other') !== categoryFilter) return false;
@@ -283,7 +310,8 @@ export default function ShoppingListPage() {
     // Search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchName = item.name.toLowerCase().includes(q);
+      const itemName = (item.ingredientName || item.name || '').toLowerCase();
+      const matchName = itemName.includes(q);
       const matchCat = (item.category || '').toLowerCase().includes(q);
       if (!matchName && !matchCat) return false;
     }
@@ -296,7 +324,21 @@ export default function ShoppingListPage() {
     new Set((activeList?.items || []).map((i) => i.category || 'Other'))
   );
 
-  const budgetSummary = activeList?.budgetSummary || {};
+  const budgetSummary = {
+    budget: activeList?.budget ?? activeList?.budgetSummary?.budget,
+    estimatedTotal: activeList?.estimatedTotal ?? activeList?.budgetSummary?.estimatedTotal ?? 0,
+    actualSpent: activeList?.actualTotal ?? activeList?.budgetSummary?.actualSpent ?? 0,
+    remainingBudget: activeList?.remainingBudget ?? activeList?.budgetSummary?.remainingBudget,
+    totalItemsCount: activeList?.itemsCount ?? activeList?.items?.length ?? 0,
+    purchasedItemsCount: activeList?.purchasedCount ?? (activeList?.items || []).filter(i => (i.isPurchased ?? i.purchased)).length,
+    pendingItemsCount: activeList?.pendingCount ?? (activeList?.items || []).filter(i => !(i.isPurchased ?? i.purchased)).length,
+    budgetUtilization: activeList?.budgetUtilisationPercent ?? activeList?.budgetSummary?.budgetUtilization ?? 0,
+    isOverBudget: activeList?.isOverBudget ?? false,
+    hasMissingPrices: activeList?.hasUnknownPrices ?? activeList?.budgetSummary?.hasMissingPrices ?? false,
+    overBudgetAmount: activeList?.budget && (activeList?.actualTotal || 0) > activeList.budget
+      ? Number(((activeList.actualTotal || 0) - activeList.budget).toFixed(2))
+      : 0
+  };
   const isOverBudget = budgetSummary.isOverBudget;
   const budgetUtilization = Math.min(budgetSummary.budgetUtilization || 0, 100);
 
@@ -719,135 +761,144 @@ export default function ShoppingListPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredItems.map((item) => (
-                        <tr
-                          key={item.id}
-                          className={`${styles.itemRow} ${item.purchased ? styles.rowPurchased : ''}`}
-                        >
-                          {/* Checkbox / Purchase Toggle */}
-                          <td>
-                            <button
-                              type="button"
-                              className={styles.checkToggleBtn}
-                              onClick={() => {
-                                if (item.purchased) {
-                                  handleUnpurchaseItem(item);
-                                } else {
-                                  setPurchaseModalItem(item);
-                                }
-                              }}
-                              title={item.purchased ? 'Click to unpurchase' : 'Mark as purchased'}
-                            >
-                              {item.purchased ? (
-                                <CheckCircle2 size={18} className={styles.checkedIcon} />
-                              ) : (
-                                <Circle size={18} className={styles.uncheckedIcon} />
-                              )}
-                            </button>
-                          </td>
+                      {filteredItems.map((item) => {
+                        const isPurchased = Boolean(item.isPurchased ?? item.purchased);
+                        const itemName = item.ingredientName || item.name || 'Item';
+                        const actualPrice = item.actualTotalPrice ?? item.actualPrice;
+                        const actualQty = item.purchasedQuantity ?? item.actualQuantity ?? item.quantity;
+                        const actualUnit = item.purchasedUnit || item.unit;
+                        const isStocked = Boolean(item.addedToInventory || item.inventoryItemId);
 
-                          {/* Ingredient & Category */}
-                          <td>
-                            <div className={styles.itemCol}>
-                              <strong className={`${styles.itemName} ${item.purchased ? styles.nameStrikethrough : ''}`}>
-                                {item.name}
-                              </strong>
-                              <div className={styles.itemSubRow}>
-                                {item.category && <span className={styles.itemCategory}>{item.category}</span>}
-                                {item.notes && <span className={styles.itemNotes}>• {item.notes}</span>}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Planned Quantity */}
-                          <td>
-                            <span className={styles.qtyText}>
-                              {item.quantity} {item.unit}
-                            </span>
-                          </td>
-
-                          {/* Estimated Price */}
-                          <td>
-                            {item.estimatedTotalPrice !== null && item.estimatedTotalPrice !== undefined ? (
-                              <div className={styles.priceCol}>
-                                <strong>{formatCurrency(item.estimatedTotalPrice)}</strong>
-                                {item.estimatedUnitPrice && (
-                                  <span className={styles.unitSubPrice}>
-                                    ₹{item.estimatedUnitPrice}/{item.unit}
-                                  </span>
+                        return (
+                          <tr
+                            key={item.id}
+                            className={`${styles.itemRow} ${isPurchased ? styles.rowPurchased : ''}`}
+                          >
+                            {/* Checkbox / Purchase Toggle */}
+                            <td>
+                              <button
+                                type="button"
+                                className={styles.checkToggleBtn}
+                                onClick={() => {
+                                  if (isPurchased) {
+                                    handleUnpurchaseItem(item);
+                                  } else {
+                                    setPurchaseModalItem(item);
+                                  }
+                                }}
+                                title={isPurchased ? 'Click to unpurchase' : 'Mark as purchased'}
+                              >
+                                {isPurchased ? (
+                                  <CheckCircle2 size={18} className={styles.checkedIcon} />
+                                ) : (
+                                  <Circle size={18} className={styles.uncheckedIcon} />
                                 )}
-                              </div>
-                            ) : (
-                              <span className={styles.missingPriceTag}>Missing Price</span>
-                            )}
-                          </td>
+                              </button>
+                            </td>
 
-                          {/* Actual Purchase Info */}
-                          <td>
-                            {item.purchased ? (
-                              <div className={styles.actualCol}>
-                                <strong className={styles.actualTotal}>
-                                  {formatCurrency(item.actualPrice, '₹0 paid')}
+                            {/* Ingredient & Category */}
+                            <td>
+                              <div className={styles.itemCol}>
+                                <strong className={`${styles.itemName} ${isPurchased ? styles.nameStrikethrough : ''}`}>
+                                  {itemName}
                                 </strong>
-                                <span className={styles.actualQty}>
-                                  Bought: {item.actualQuantity || item.quantity} {item.unit}
-                                </span>
+                                <div className={styles.itemSubRow}>
+                                  {item.category && <span className={styles.itemCategory}>{item.category}</span>}
+                                  {item.notes && <span className={styles.itemNotes}>• {item.notes}</span>}
+                                </div>
                               </div>
-                            ) : (
-                              <span className={styles.pendingText}>Pending</span>
-                            )}
-                          </td>
+                            </td>
 
-                          {/* Add to Inventory Action / Status */}
-                          <td>
-                            {item.purchased ? (
-                              item.inventoryItemId ? (
-                                <span className={styles.inInventoryBadge} title="Added to pantry stock">
-                                  <PackageCheck size={14} />
-                                  <span>In Pantry</span>
-                                </span>
+                            {/* Planned Quantity */}
+                            <td>
+                              <span className={styles.qtyText}>
+                                {item.quantity} {item.unit}
+                              </span>
+                            </td>
+
+                            {/* Estimated Price */}
+                            <td>
+                              {item.estimatedTotalPrice !== null && item.estimatedTotalPrice !== undefined ? (
+                                <div className={styles.priceCol}>
+                                  <strong>{formatCurrency(item.estimatedTotalPrice)}</strong>
+                                  {item.estimatedUnitPrice && (
+                                    <span className={styles.unitSubPrice}>
+                                      ₹{item.estimatedUnitPrice}/{item.unit}
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
+                                <span className={styles.missingPriceTag}>Missing Price</span>
+                              )}
+                            </td>
+
+                            {/* Actual Purchase Info */}
+                            <td>
+                              {isPurchased ? (
+                                <div className={styles.actualCol}>
+                                  <strong className={styles.actualTotal}>
+                                    {formatCurrency(actualPrice, '₹0 paid')}
+                                  </strong>
+                                  <span className={styles.actualQty}>
+                                    Bought: {actualQty} {actualUnit}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className={styles.pendingText}>Pending</span>
+                              )}
+                            </td>
+
+                            {/* Add to Inventory Action / Status */}
+                            <td>
+                              {isPurchased ? (
+                                isStocked ? (
+                                  <span className={styles.inInventoryBadge} title="Added to pantry stock">
+                                    <PackageCheck size={14} />
+                                    <span>In Pantry</span>
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className={styles.addToInvBtn}
+                                    onClick={() => setAddToInventoryModalItem(item)}
+                                    title="Add purchased quantity into kitchen inventory stock"
+                                  >
+                                    <PackageCheck size={14} />
+                                    <span>Add to Inventory</span>
+                                  </button>
+                                )
+                              ) : (
+                                <span className={styles.dashText}>—</span>
+                              )}
+                            </td>
+
+                            {/* Actions */}
+                            <td style={{ textAlign: 'right' }}>
+                              <div className={styles.itemActionGroup}>
                                 <button
                                   type="button"
-                                  className={styles.addToInvBtn}
-                                  onClick={() => setAddToInventoryModalItem(item)}
-                                  title="Add purchased quantity into kitchen inventory stock"
+                                  className={styles.itemIconBtn}
+                                  onClick={() => {
+                                    setEditingItemData(item);
+                                    setIsAddItemOpen(true);
+                                  }}
+                                  title="Edit item"
                                 >
-                                  <PackageCheck size={14} />
-                                  <span>Add to Inventory</span>
+                                  <Edit2 size={14} />
                                 </button>
-                              )
-                            ) : (
-                              <span className={styles.dashText}>—</span>
-                            )}
-                          </td>
-
-                          {/* Actions */}
-                          <td style={{ textAlign: 'right' }}>
-                            <div className={styles.itemActionGroup}>
-                              <button
-                                type="button"
-                                className={styles.itemIconBtn}
-                                onClick={() => {
-                                  setEditingItemData(item);
-                                  setIsAddItemOpen(true);
-                                }}
-                                title="Edit item"
-                              >
-                                <Edit2 size={14} />
-                              </button>
-                              <button
-                                type="button"
-                                className={`${styles.itemIconBtn} ${styles.itemIconDanger}`}
-                                onClick={() => handleDeleteItem(item.id, item.name)}
-                                title="Delete item"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                                <button
+                                  type="button"
+                                  className={`${styles.itemIconBtn} ${styles.itemIconDanger}`}
+                                  onClick={() => handleDeleteItem(item.id, itemName)}
+                                  title="Delete item"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

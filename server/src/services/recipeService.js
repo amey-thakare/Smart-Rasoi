@@ -579,6 +579,15 @@ export const updateRecipe = async (userId, recipeId, data) => {
           isOptional: ing.isOptional
         }))
       });
+
+      // Invalidate cached nutrition on ingredient modification so future requests recalculate fresh
+      try {
+        await tx.recipeNutrition.deleteMany({
+          where: { recipeId }
+        });
+      } catch {
+        // Non-fatal
+      }
     }
 
     return tx.recipe.findUnique({

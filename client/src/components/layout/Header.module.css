@@ -93,39 +93,7 @@
   color: var(--text-primary);
 }
 
-/* API Status Indicator Badge */
-.apiStatusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.76rem;
-  font-weight: 600;
-  border: 1px solid var(--border-subtle);
-  background-color: var(--bg-subtle);
-  color: var(--text-secondary);
-}
 
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.dotConnected {
-  background-color: var(--color-success);
-  box-shadow: 0 0 0 2px var(--color-success-light);
-}
-
-.dotDisconnected {
-  background-color: var(--color-warning);
-  box-shadow: 0 0 0 2px var(--color-warning-light);
-}
-
-.dotChecking {
-  background-color: var(--text-muted);
-}
 
 /* Notification Button & Popover */
 .notifWrapper {
@@ -218,16 +186,7 @@
   color: var(--text-muted);
 }
 
-.notifFooterNotice {
-  padding: var(--space-xs) var(--space-sm);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border-subtle);
-  margin-top: var(--space-xs);
-  text-align: center;
-  background-color: var(--bg-subtle);
-  border-radius: var(--radius-xs);
-}
+
 
 /* User Profile & Dropdown */
 .profileWrapper {
@@ -355,9 +314,6 @@
     display: none;
   }
   .userName {
-    display: none;
-  }
-  .apiStatusBadge span {
     display: none;
   }
 }

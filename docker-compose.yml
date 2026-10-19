@@ -1,0 +1,19 @@
+services:
+  smart-rasoi:
+    build: .
+    container_name: smart-rasoi-app
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=smart_rasoi_production_jwt_secret_2026_super_secure
+      - JWT_EXPIRES_IN=7d
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - smart-rasoi-data:/app/server/prisma
+
+volumes:
+  smart-rasoi-data:

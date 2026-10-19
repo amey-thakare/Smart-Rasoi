@@ -195,7 +195,7 @@ export const sendAiChatMessage = async ({ message, conversationHistory = [], con
   const response = await apiClient.post(
     '/ai/chat',
     { message, conversationHistory, context },
-    { timeout: 30000 } // Extended timeout for conversational LLM generation
+    { timeout: 45000 } // Extended timeout for conversational LLM generation
   );
   return response.data;
 };
@@ -213,7 +213,7 @@ export const fetchAiContext = async () => {
  */
 export const generateAiRecipeApi = async (payload) => {
   const response = await apiClient.post('/ai/recipes/generate', payload, {
-    timeout: 30000
+    timeout: 45000
   });
   return response.data;
 };
@@ -223,7 +223,7 @@ export const generateAiRecipeApi = async (payload) => {
  */
 export const modifyAiRecipeApi = async (recipeId, payload) => {
   const response = await apiClient.post(`/ai/recipes/${recipeId}/modify`, payload, {
-    timeout: 30000
+    timeout: 45000
   });
   return response.data;
 };
@@ -233,7 +233,7 @@ export const modifyAiRecipeApi = async (recipeId, payload) => {
  */
 export const suggestSubstitutionsApi = async (payload) => {
   const response = await apiClient.post('/ai/substitutions', payload, {
-    timeout: 20000
+    timeout: 30000
   });
   return response.data;
 };
@@ -344,6 +344,11 @@ export const addShoppingListItem = async (listId, data) => {
   return response.data;
 };
 
+export const addShoppingListItemsBulk = async (listId, items) => {
+  const response = await apiClient.post(`/shopping-lists/${listId}/items/bulk`, { items });
+  return response.data;
+};
+
 export const updateShoppingListItem = async (listId, itemId, data) => {
   const response = await apiClient.patch(`/shopping-lists/${listId}/items/${itemId}`, data);
   return response.data;
@@ -406,6 +411,122 @@ export const updateBudgetSettings = async (data) => {
 
 export const fetchDashboardShoppingSummary = async () => {
   const response = await apiClient.get('/shopping-lists/dashboard-summary');
+  return response.data;
+};
+
+// ==========================================
+// Phase 9: Nutrition & Dietary Tracking APIs
+// ==========================================
+
+export const fetchDietaryProfile = async () => {
+  const response = await apiClient.get('/nutrition/profile');
+  return response.data;
+};
+
+export const updateDietaryProfile = async (profileData) => {
+  const response = await apiClient.patch('/nutrition/profile', profileData);
+  return response.data;
+};
+
+export const fetchRecipeNutrition = async (recipeId, servings) => {
+  const params = servings ? { servings } : {};
+  const response = await apiClient.get(`/nutrition/recipes/${recipeId}`, { params });
+  return response.data;
+};
+
+export const calculateRecipeNutrition = async (recipeId, data = {}) => {
+  const response = await apiClient.post(`/nutrition/recipes/${recipeId}/calculate`, data);
+  return response.data;
+};
+
+export const fetchDailyNutrition = async (date) => {
+  const params = date ? { date } : {};
+  const response = await apiClient.get('/nutrition/daily', { params });
+  return response.data;
+};
+
+export const fetchWeeklyNutrition = async (startDate) => {
+  const params = startDate ? { startDate } : {};
+  const response = await apiClient.get('/nutrition/weekly', { params });
+  return response.data;
+};
+
+export const fetchDashboardNutritionSummary = async () => {
+  const response = await apiClient.get('/nutrition/dashboard-summary');
+  return response.data;
+};
+
+export const fetchMealHistory = async (params = {}) => {
+  const response = await apiClient.get('/nutrition/history', { params });
+  return response.data;
+};
+
+export const logMealConsumption = async (consumptionData) => {
+  const response = await apiClient.post('/nutrition/consumption', consumptionData);
+  return response.data;
+};
+
+export const updateMealConsumption = async (id, updateData) => {
+  const response = await apiClient.patch(`/nutrition/consumption/${id}`, updateData);
+  return response.data;
+};
+
+export const deleteMealConsumption = async (id) => {
+  const response = await apiClient.delete(`/nutrition/consumption/${id}`);
+  return response.data;
+};
+
+export const askNutritionAssistant = async (data) => {
+  const response = await apiClient.post('/nutrition/assistant', data);
+  return response.data;
+};
+
+// ============================================================
+// Phase 10: Food-Waste Analytics, Expiry Tracking & Reduction
+// ============================================================
+
+export const fetchExpiryOverview = async (params = {}) => {
+  const response = await apiClient.get('/waste/expiry', { params });
+  return response.data;
+};
+
+export const fetchWasteRecords = async (params = {}) => {
+  const response = await apiClient.get('/waste/records', { params });
+  return response.data;
+};
+
+export const recordFoodWaste = async (wasteData) => {
+  const response = await apiClient.post('/waste/records', wasteData);
+  return response.data;
+};
+
+export const reverseFoodWaste = async (id, data = {}) => {
+  const response = await apiClient.post(`/waste/records/${id}/reverse`, data);
+  return response.data;
+};
+
+export const fetchWasteAnalytics = async (params = {}) => {
+  const response = await apiClient.get('/waste/analytics', { params });
+  return response.data;
+};
+
+export const fetchAtRiskInventory = async () => {
+  const response = await apiClient.get('/waste/at-risk');
+  return response.data;
+};
+
+export const fetchExpiryRecipeSuggestions = async () => {
+  const response = await apiClient.get('/waste/recipe-suggestions');
+  return response.data;
+};
+
+export const fetchDashboardWasteSummary = async () => {
+  const response = await apiClient.get('/waste/summary');
+  return response.data;
+};
+
+export const fetchAiWasteAdvice = async (data) => {
+  const response = await apiClient.post('/waste/ai-advice', data);
   return response.data;
 };
 

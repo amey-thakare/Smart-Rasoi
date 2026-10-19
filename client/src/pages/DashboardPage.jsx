@@ -11,6 +11,7 @@ import RecipeDetailModal from '../components/recipes/RecipeDetailModal.jsx';
 import MealSchedulePreview from '../components/dashboard/MealSchedulePreview.jsx';
 import WasteAwarenessCard from '../components/dashboard/WasteAwarenessCard.jsx';
 import ShoppingSummaryCard from '../components/dashboard/ShoppingSummaryCard.jsx';
+import NutritionSummaryCard from '../components/dashboard/NutritionSummaryCard.jsx';
 import {
   fetchInventorySummary,
   fetchInventoryItems,
@@ -18,7 +19,8 @@ import {
   addRecipeFavourite,
   removeRecipeFavourite,
   fetchDashboardMealSummary,
-  fetchDashboardShoppingSummary
+  fetchDashboardShoppingSummary,
+  fetchDashboardNutritionSummary
 } from '../services/api.js';
 import {
   mockUpcomingMeals,
@@ -44,6 +46,10 @@ export default function DashboardPage() {
   const [shoppingSummary, setShoppingSummary] = useState({});
   const [shoppingLoading, setShoppingLoading] = useState(true);
 
+  // Phase 9: Live Daily Nutrition Summary
+  const [nutritionSummary, setNutritionSummary] = useState(null);
+  const [nutritionLoading, setNutritionLoading] = useState(true);
+
   const { user } = useAuth();
   const firstName = user?.name ? user.name.split(' ')[0] : null;
 
@@ -55,27 +61,35 @@ export default function DashboardPage() {
       setRecipesLoading(true);
       setMealsLoading(true);
       setShoppingLoading(true);
+      setNutritionLoading(true);
 
       try {
-        const [sumData, itemsData, matchesData, mealSumData, shopSumData] = await Promise.all([
+        const [sumData, itemsData, matchesData, mealSumData, shopSumData, nutrSumData] = await Promise.all([
           fetchInventorySummary(),
           fetchInventoryItems({ sortBy: 'expiryDate', sortOrder: 'asc' }),
           fetchRecipeMatches(),
           fetchDashboardMealSummary().catch(() => null),
-          fetchDashboardShoppingSummary().catch(() => null)
+          fetchDashboardShoppingSummary().catch(() => null),
+          fetchDashboardNutritionSummary().catch(() => null)
         ]);
 
         if (isMounted) {
-          setSummary(sumData);
-          setInventoryItems(itemsData?.items ? itemsData.items.slice(0, 5) : []);
+          setSummary(sumData?.data || sumData || {});
+          const invItems = itemsData?.data?.items || itemsData?.items || (Array.isArray(itemsData) ? itemsData : []);
+          setInventoryItems(invItems.slice(0, 5));
 
           // Top matched recipes
-          const matches = matchesData?.data?.matches || [];
+          const matches = matchesData?.data?.matches || matchesData?.matches || (Array.isArray(matchesData) ? matchesData : []);
           setMatchedRecipes(matches.slice(0, 3));
 
           // Phase 8: Shopping Summary
           if (shopSumData?.success && shopSumData?.data) {
             setShoppingSummary(shopSumData.data);
+          }
+
+          // Phase 9: Nutrition Summary
+          if (nutrSumData?.success && nutrSumData?.data) {
+            setNutritionSummary(nutrSumData.data);
           }
 
           // Format live meal plans for dashboard
@@ -121,6 +135,7 @@ export default function DashboardPage() {
           setRecipesLoading(false);
           setMealsLoading(false);
           setShoppingLoading(false);
+          setNutritionLoading(false);
         }
       }
     }
@@ -339,6 +354,18 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Phase 9: Nutritional Intake & Daily Health Summary */}
+      <section aria-label="Nutritional Intake & Health">
+        <SectionHeader
+          title="Daily Nutrition & Dietary Intake"
+          subtitle="Real-time macro tracking, calorie goal progress, and consumption ledger"
+          actionText="View Nutrition Details"
+          actionTo="/nutrition"
+          badge="Live Tracker"
+        />
+        <NutritionSummaryCard summary={nutritionSummary} loading={nutritionLoading} />
       </section>
 
       {/* H. Smart Grocery Shopping & Budget Summary */}

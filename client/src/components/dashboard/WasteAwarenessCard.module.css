@@ -2,13 +2,19 @@
   background: linear-gradient(135deg, #FAF8F2 0%, #EFF5F1 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: 1.5rem;
   display: flex;
   align-items: flex-start;
-  gap: var(--space-lg);
+  gap: 1.25rem;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.cardUrgent {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF2F2 100%);
+  border-color: var(--color-warning-border);
 }
 
 .iconWrapper {
@@ -23,21 +29,27 @@
   flex-shrink: 0;
 }
 
+.iconWrapperUrgent {
+  background-color: var(--color-warning);
+  color: #fff;
+}
+
 .content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 0.65rem;
 }
 
 .headerRow {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
 .title {
+  margin: 0;
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -52,43 +64,119 @@
   border-radius: var(--radius-full);
 }
 
+.badgeUrgent {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
 .text {
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.5;
   max-width: 820px;
 }
 
-.tipsGrid {
+.metricsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-sm);
-  margin-top: var(--space-xs);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.metricItem {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(27, 67, 50, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.metricLabel {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.metricVal {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.valDanger {
+  color: var(--color-danger);
+}
+
+.valWarning {
+  color: var(--color-warning);
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed rgba(27, 67, 50, 0.1);
+}
+
+.tipsGrid {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .tipItem {
-  background-color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(27, 67, 50, 0.08);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
-  font-size: 0.82rem;
-  color: var(--text-primary);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 0.4rem;
 }
 
 .tipDot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background-color: var(--color-secondary);
   flex-shrink: 0;
 }
 
+.viewHubBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-subtle);
+  border: 1px solid var(--color-primary-light);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.viewHubBtn:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
 @media (max-width: 680px) {
   .card {
     flex-direction: column;
-    padding: var(--space-md);
+    padding: 1.15rem;
+  }
+  .footerRow {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

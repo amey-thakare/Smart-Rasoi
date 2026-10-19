@@ -73,7 +73,7 @@ export default function MealSchedulePreview({ schedule = [], loading = false, is
       ))}
 
       <div className={styles.footer}>
-        <span>{isLive ? 'Live Database Schedule' : 'Demonstration meal schedule'}</span>
+        <span>{isLive ? 'Live Weekly Schedule' : 'Weekly Meal Schedule'}</span>
         <Link to="/meal-planner" className={styles.planLink}>
           <span>Open Meal Planner</span>
           <ArrowRight size={14} />

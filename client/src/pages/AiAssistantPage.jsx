@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Sparkles,
   Send,
@@ -198,6 +199,20 @@ export default function AiAssistantPage() {
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const [searchParams] = useSearchParams();
+
+  // Populate prompt if passed via URL (e.g. from Inventory "Ask Chef AI")
+  useEffect(() => {
+    const prompt = searchParams.get('prompt');
+    if (prompt) {
+      setInputMessage(prompt);
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      }
+    }
+  }, [searchParams]);
 
   // Fetch verified kitchen context
   const loadKitchenContext = useCallback(async () => {
@@ -325,7 +340,7 @@ export default function AiAssistantPage() {
           <div>
             <h1 className={styles.title}>AI Kitchen Assistant</h1>
             <p className={styles.subtitle}>
-              Culinary copilot powered by Google Gemini, tailored to your live pantry inventory and recipe catalog.
+              Culinary copilot tailored to your live pantry inventory and recipe catalog.
             </p>
           </div>
         </div>
@@ -444,7 +459,7 @@ export default function AiAssistantPage() {
               <div className={styles.welcomeIconWrapper}>
                 <Sparkles size={32} />
               </div>
-              <h2 className={styles.welcomeTitle}>Welcome to Chef Gemini</h2>
+              <h2 className={styles.welcomeTitle}>Welcome to AI Kitchen Assistant</h2>
               <p className={styles.welcomeText}>
                 I'm your Smart Rasoi kitchen assistant. I have real-time visibility into your pantry to help you cook
                 creative meals, minimize food waste, and suggest smart ingredient substitutions.
@@ -503,7 +518,7 @@ export default function AiAssistantPage() {
                 <Bot size={16} />
               </div>
               <div className={`${styles.bubble} ${styles.bubbleAssistant}`}>
-                <div className={styles.typingIndicator} aria-label="Chef Gemini is typing">
+                <div className={styles.typingIndicator} aria-label="AI Assistant is typing">
                   <div className={styles.typingDot} />
                   <div className={styles.typingDot} />
                   <div className={styles.typingDot} />
@@ -568,7 +583,7 @@ export default function AiAssistantPage() {
               value={inputMessage}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Chef Gemini... (e.g. 'What can I cook with my paneer?', 'Substitute for buttermilk')"
+              placeholder="Ask AI Chef... (e.g. 'What can I cook with my paneer?', 'Substitute for buttermilk')"
               className={styles.textarea}
               disabled={isSubmitting}
               aria-label="Message to AI Kitchen Assistant"
@@ -586,7 +601,7 @@ export default function AiAssistantPage() {
 
           <div className={styles.inputFooter}>
             <span>Press <strong>Enter</strong> to send, <strong>Shift + Enter</strong> for a new line.</span>
-            <span>Gemini uses your verified pantry data.</span>
+            <span>AI Assistant uses your verified pantry data.</span>
           </div>
         </div>
       </main>

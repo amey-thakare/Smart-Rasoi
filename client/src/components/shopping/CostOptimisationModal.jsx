@@ -122,7 +122,7 @@ export default function CostOptimisationModal({
             onClick={() => setActiveTab('ai')}
           >
             <Sparkles size={15} />
-            <span>Chef Gemini AI Advice</span>
+            <span>Smart AI Advice</span>
           </button>
         </div>
 
@@ -260,7 +260,7 @@ export default function CostOptimisationModal({
             <div className={styles.aiContent}>
               <div className={styles.aiPromptSection}>
                 <p className={styles.aiNotice}>
-                  Ask Chef Gemini for culinary budget guidance based on your verified shopping list and pantry inventory.
+                  Ask AI Chef for culinary budget guidance based on your verified shopping list and pantry inventory.
                 </p>
 
                 <div className={styles.quickPromptChips}>
@@ -288,7 +288,7 @@ export default function CostOptimisationModal({
                   <input
                     type="text"
                     className={styles.aiInput}
-                    placeholder="Ask Gemini for smart shopping advice..."
+                    placeholder="Ask AI Chef for smart shopping advice..."
                     value={aiQuery}
                     onChange={(e) => setAiQuery(e.target.value)}
                     onKeyDown={(e) => {
@@ -313,19 +313,19 @@ export default function CostOptimisationModal({
               {aiLoading ? (
                 <div className={styles.loadingBox}>
                   <div className={styles.spinner} />
-                  <span>Chef Gemini is analysing your ingredients and budget opportunities...</span>
+                  <span>AI Chef is analysing your ingredients and budget opportunities...</span>
                 </div>
               ) : aiResult ? (
                 <div className={styles.aiResponseCard}>
                   <div className={styles.aiResponseHeader}>
                     <Sparkles size={16} />
-                    <span>Chef Gemini Recommendations</span>
+                    <span>AI Chef Recommendations</span>
                   </div>
                   <div className={styles.aiAdviceText}>{aiResult.advice}</div>
 
                   {aiResult.meta && (
                     <div className={styles.aiMetaFooter}>
-                      <span>Powered by {aiResult.meta.model || 'Gemini'}</span>
+                      <span>Powered by {aiResult.meta.model || 'Smart Rasoi AI'}</span>
                       <span>List: {aiResult.meta.listName}</span>
                     </div>
                   )}

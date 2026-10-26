@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:client": "npm --prefix client run dev",
+    "dev:client": "npm --prefix client run dev -- --host 0.0.0.0",
     "dev:server": "npm --prefix server run dev",
     "postinstall": "npm --prefix client install && npm --prefix server install && npm --prefix server run prisma:generate",
     "build": "npm --prefix client run build && npm --prefix server run prisma:deploy && npm --prefix server run db:seed",

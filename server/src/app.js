@@ -25,9 +25,27 @@ const allowedOrigins = [
   'http://127.0.0.1:5175'
 ];
 
+const isLocalOrPrivateNetwork = (hostname) => {
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname === 'smart-rasoi.home.arpa' ||
+    hostname.endsWith('.home.arpa') ||
+    hostname.endsWith('.arpa') ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.internal') ||
+    hostname.endsWith('.lan') ||
+    hostname.endsWith('.home') ||
+    /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(hostname)
+  );
+};
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server or requests without origin (like mobile apps or curl)
+    // Allow server-to-server or requests without origin (like mobile apps, Postman or curl)
     if (!origin) {
       return callback(null, true);
     }
@@ -35,11 +53,11 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    // In development or test, allow any localhost / 127.0.0.1 port
+    // In development or test, allow localhost, 127.0.0.1, or any LAN Wi-Fi IP address
     if (env.NODE_ENV !== 'production') {
       try {
         const parsed = new URL(origin);
-        if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+        if (isLocalOrPrivateNetwork(parsed.hostname)) {
           return callback(null, true);
         }
       } catch {
